@@ -1,0 +1,806 @@
+{
+  "roles": [
+    {
+      "id": 1,
+      "name": "ADMIN",
+      "description": "Quản trị viên"
+    },
+    {
+      "id": 2,
+      "name": "EMPLOYEE",
+      "description": "Nhân viên"
+    },
+    {
+      "id": 3,
+      "name": "CUSTOMER",
+      "description": "Khách hàng"
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "role_id": 1,
+      "full_name": "Quản Trị Viên Kim Đồng",
+      "email": "admin@kimdong.vn",
+      "password": "$2a$10$0.frl37ZJiTg4UvSkNUIMufGURfFBT2pRWYF2IRTV.fK8RFnsaRNO",
+      "phone": "0901234567",
+      "address": "55 Quang Trung",
+      "province": "Hà Nội",
+      "district": "Hai Bà Trưng",
+      "ward": "Nguyễn Du"
+    },
+    {
+      "id": 2,
+      "role_id": 2,
+      "full_name": "Nhân Viên Kho",
+      "email": "nhanvien@kimdong.vn",
+      "password": "$2a$10$0.frl37ZJiTg4UvSkNUIMufGURfFBT2pRWYF2IRTV.fK8RFnsaRNO",
+      "phone": "0912345678",
+      "address": "55 Quang Trung",
+      "province": "Hà Nội",
+      "district": "Hai Bà Trưng",
+      "ward": "Nguyễn Du"
+    },
+    {
+      "id": 3,
+      "role_id": 3,
+      "full_name": "Nguyễn Văn An",
+      "email": "khachhang@gmail.com",
+      "password": "$2a$10$EZIiQsdkIiIw6rlj5dYHieRcepTLdV4L77.CjmS6kEeclu.Acqhue",
+      "phone": "0987654321",
+      "address": "123 Nguyễn Trãi",
+      "province": "TP. Hồ Chí Minh",
+      "district": "Quận 1",
+      "ward": "Bến Thành"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "parent_id": null,
+      "name": "Manga - Comic",
+      "slug": "manga-comic",
+      "description": "Truyện tranh Nhật Bản và quốc tế",
+      "display_order": 1
+    },
+    {
+      "id": 2,
+      "parent_id": null,
+      "name": "Sách Thiếu Nhi",
+      "slug": "sach-thieu-nhi",
+      "description": "Truyện tranh, truyện chữ và sách minh họa cho thiếu nhi",
+      "display_order": 2
+    },
+    {
+      "id": 3,
+      "parent_id": null,
+      "name": "Văn Học",
+      "slug": "van-hoc",
+      "description": "Tiểu thuyết, truyện ngắn văn học Việt Nam và thế giới",
+      "display_order": 3
+    },
+    {
+      "id": 4,
+      "parent_id": null,
+      "name": "Sách Kỹ Năng - Lifestyle",
+      "slug": "sach-ky-nang",
+      "description": "Sách phát triển bản thân, kỹ năng sống và tư duy",
+      "display_order": 4
+    },
+    {
+      "id": 5,
+      "parent_id": null,
+      "name": "Khoa Học - Tri Thức",
+      "slug": "khoa-hoc-tri-thuc",
+      "description": "Bách khoa toàn thư và tri thức bách khoa",
+      "display_order": 5
+    },
+    {
+      "id": 6,
+      "parent_id": 1,
+      "name": "Doraemon",
+      "slug": "doraemon",
+      "description": "Chú mèo máy đến từ tương lai",
+      "display_order": 1
+    },
+    {
+      "id": 7,
+      "parent_id": 1,
+      "name": "Thám Tử Lừng Danh Conan",
+      "slug": "conan",
+      "description": "Sê-ri trinh thám huyền thoại",
+      "display_order": 2
+    },
+    {
+      "id": 8,
+      "parent_id": 1,
+      "name": "One Piece",
+      "slug": "one-piece",
+      "description": "Hành trình trở thành Vua Hải Tặc",
+      "display_order": 3
+    },
+    {
+      "id": 9,
+      "parent_id": 1,
+      "name": "Dragon Ball",
+      "slug": "dragon-ball",
+      "description": "Bảy viên ngọc rồng",
+      "display_order": 4
+    },
+    {
+      "id": 10,
+      "parent_id": 2,
+      "name": "Truyện Tranh Thiếu Nhi",
+      "slug": "truyen-tranh-thieu-nhi",
+      "description": "Truyện màu sinh động",
+      "display_order": 1
+    },
+    {
+      "id": 11,
+      "parent_id": 2,
+      "name": "Sách Giáo Dục & Kỹ Năng Trẻ",
+      "slug": "sach-giao-duc-tre",
+      "description": "Phát triển trí thông minh EQ, IQ",
+      "display_order": 2
+    },
+    {
+      "id": 12,
+      "parent_id": 3,
+      "name": "Văn Học Việt Nam",
+      "slug": "van-hoc-viet-nam",
+      "description": "Tác phẩm văn học kinh điển Việt Nam",
+      "display_order": 1
+    },
+    {
+      "id": 13,
+      "parent_id": 3,
+      "name": "Văn Học Nước Ngoài",
+      "slug": "van-hoc-nuoc-ngoai",
+      "description": "Sách dịch bán chạy thế giới",
+      "display_order": 2
+    }
+  ],
+  "authors": [
+    {
+      "id": 1,
+      "name": "Fujiko F Fujio",
+      "slug": "fujiko-f-fujio",
+      "bio": "Họa sĩ truyện tranh huyền thoại Nhật Bản, tác giả của Doraemon."
+    },
+    {
+      "id": 2,
+      "name": "Gosho Aoyama",
+      "slug": "gosho-aoyama",
+      "bio": "Tác giả của bộ truyện tranh trinh thám nổi tiếng Thám tử lừng danh Conan."
+    },
+    {
+      "id": 3,
+      "name": "Eiichiro Oda",
+      "slug": "eiichiro-oda",
+      "bio": "Tác giả kiêm họa sĩ của manga bán chạy nhất lịch sử One Piece."
+    },
+    {
+      "id": 4,
+      "name": "Akira Toriyama",
+      "slug": "akira-toriyama",
+      "bio": "Tác giả vĩ đại của Dragon Ball và Dr. Slump."
+    },
+    {
+      "id": 5,
+      "name": "Nguyễn Nhật Ánh",
+      "slug": "nguyen-nhat-anh",
+      "bio": "Nhà văn hàng đầu Việt Nam chuyên viết cho thiếu nhi và tuổi mới lớn."
+    },
+    {
+      "id": 6,
+      "name": "Tô Hoài",
+      "slug": "to-hoai",
+      "bio": "Tác giả của tác phẩm kinh điển Dế Mèn Phiêu Lưu Ký."
+    },
+    {
+      "id": 7,
+      "name": "Dale Carnegie",
+      "slug": "dale-carnegie",
+      "bio": "Tác giả cuốn sách phát triển bản thân nổi tiếng Đắc Nhân Tâm."
+    }
+  ],
+  "publishers": [
+    {
+      "id": 1,
+      "name": "Nhà Xuất Bản Kim Đồng",
+      "slug": "nxb-kim-dong",
+      "address": "55 Quang Trung, Hai Bà Trưng, Hà Nội",
+      "phone": "1900571595",
+      "email": "info@nxbkimdong.com.vn"
+    },
+    {
+      "id": 2,
+      "name": "NXB Trẻ",
+      "slug": "nxb-tre",
+      "address": "161B Lý Chính Thắng, Phường 7, Quận 3, TP.HCM",
+      "phone": "02839316289",
+      "email": "nxbtre@nxbtre.com.vn"
+    },
+    {
+      "id": 3,
+      "name": "NXB Văn Học",
+      "slug": "nxb-van-hoc",
+      "address": "18 Nguyễn Trường Tộ, Ba Đình, Hà Nội",
+      "phone": "02437161518",
+      "email": "nxbvanhoc@gmail.com"
+    }
+  ],
+  "books": [
+    {
+      "id": 1,
+      "category_id": 6,
+      "author_id": 1,
+      "publisher_id": 1,
+      "title": "Doraemon - Tập 1 (Tái Bản 2024)",
+      "slug": "doraemon-tap-1",
+      "isbn": "9786042270015",
+      "import_price": 12000,
+      "price": 25000,
+      "sale_price": 20000,
+      "stock": 150,
+      "sold_quantity": 890,
+      "publication_year": 2024,
+      "num_pages": 192,
+      "cover_type": "Bìa mềm",
+      "dimensions": "11.3 x 17.6 cm",
+      "weight": 180,
+      "description": "Chú mèo máy Doraemon đến từ thế kỷ 22 đáp xuống phòng của chú bé Nobita hậu đậu để giúp đỡ chú đổi thay số phận. Tập 1 mở đầu hành trình với những bảo bối kỳ diệu như Chong chóng tre, Cánh cửa thần kỳ...",
+      "is_featured": 1,
+      "is_new": 1,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 2,
+      "category_id": 6,
+      "author_id": 1,
+      "publisher_id": 1,
+      "title": "Doraemon - Tập 2 (Phiên Bản Tiêu Chuẩn)",
+      "slug": "doraemon-tap-2",
+      "isbn": "9786042270022",
+      "import_price": 12000,
+      "price": 25000,
+      "sale_price": 20000,
+      "stock": 118,
+      "sold_quantity": 650,
+      "publication_year": 2024,
+      "num_pages": 192,
+      "cover_type": "Bìa mềm",
+      "dimensions": "11.3 x 17.6 cm",
+      "weight": 180,
+      "description": "Tiếp tục cuộc hành trình hài hước cùng Doraemon và nhóm bạn Nobita, Shizuka, Suneo, Jaian với muôn vàn bảo bối độc đáo.",
+      "is_featured": 1,
+      "is_new": 0,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 3,
+      "category_id": 6,
+      "author_id": 1,
+      "publisher_id": 1,
+      "title": "Doraemon Bóng Chày - Tập 1",
+      "slug": "doraemon-bong-chay-tap-1",
+      "isbn": "9786042270039",
+      "import_price": 15000,
+      "price": 30000,
+      "sale_price": 25000,
+      "stock": 80,
+      "sold_quantity": 420,
+      "publication_year": 2024,
+      "num_pages": 200,
+      "cover_type": "Bìa mềm",
+      "dimensions": "11.3 x 17.6 cm",
+      "weight": 190,
+      "description": "Sê-ri bóng chày kỳ thú của các chú mèo máy trong đội bóng Doras!",
+      "is_featured": 0,
+      "is_new": 1,
+      "is_bestseller": 0,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 4,
+      "category_id": 7,
+      "author_id": 2,
+      "publisher_id": 1,
+      "title": "Thám Tử Lừng Danh Conan - Tập 100",
+      "slug": "conan-tap-100",
+      "isbn": "9786042271005",
+      "import_price": 15000,
+      "price": 30000,
+      "sale_price": 24000,
+      "stock": 200,
+      "sold_quantity": 1540,
+      "publication_year": 2024,
+      "num_pages": 192,
+      "cover_type": "Bìa mềm",
+      "dimensions": "11.3 x 17.6 cm",
+      "weight": 185,
+      "description": "Tập 100 cột mốc lịch sử! Cụm vụ án gay cấn liên quan đến Tổ chức Áo đen cùng cuộc đấu trí giữa Conan và Akai Shuichi.",
+      "is_featured": 1,
+      "is_new": 1,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 5,
+      "category_id": 7,
+      "author_id": 2,
+      "publisher_id": 1,
+      "title": "Thám Tử Lừng Danh Conan - Tập 101",
+      "slug": "conan-tap-101",
+      "isbn": "9786042271012",
+      "import_price": 15000,
+      "price": 30000,
+      "sale_price": 25000,
+      "stock": 138,
+      "sold_quantity": 780,
+      "publication_year": 2024,
+      "num_pages": 192,
+      "cover_type": "Bìa mềm",
+      "dimensions": "11.3 x 17.6 cm",
+      "weight": 185,
+      "description": "Những manh mối mới hé lộ bí mật về trùm tổ chức Áo Đen và gia đình Akai.",
+      "is_featured": 0,
+      "is_new": 1,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 6,
+      "category_id": 8,
+      "author_id": 3,
+      "publisher_id": 1,
+      "title": "One Piece - Tập 105: Giấc Mơ Của Luffy",
+      "slug": "one-piece-tap-105",
+      "isbn": "9786042272057",
+      "import_price": 18000,
+      "price": 35000,
+      "sale_price": 28000,
+      "stock": 300,
+      "sold_quantity": 2100,
+      "publication_year": 2024,
+      "num_pages": 208,
+      "cover_type": "Bìa mềm",
+      "dimensions": "11.3 x 17.6 cm",
+      "weight": 200,
+      "description": "Trận chiến Wano Quốc khép lại! Tân Tứ Hoàng xuất hiện và mở ra kỷ nguyên mới hướng tới kho báu One Piece.",
+      "is_featured": 1,
+      "is_new": 1,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 7,
+      "category_id": 8,
+      "author_id": 3,
+      "publisher_id": 1,
+      "title": "One Piece - Tập 106",
+      "slug": "one-piece-tap-106",
+      "isbn": "9786042272064",
+      "import_price": 18000,
+      "price": 35000,
+      "sale_price": 29000,
+      "stock": 180,
+      "sold_quantity": 950,
+      "publication_year": 2024,
+      "num_pages": 208,
+      "cover_type": "Bìa mềm",
+      "dimensions": "11.3 x 17.6 cm",
+      "weight": 200,
+      "description": "Băng Mũ Rơm đặt chân lên đảo tương lai Egghead và gặp gỡ thiên tài Dr. Vegapunk.",
+      "is_featured": 0,
+      "is_new": 1,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 8,
+      "category_id": 9,
+      "author_id": 4,
+      "publisher_id": 1,
+      "title": "Dragon Ball 7 Viên Ngọc Rồng - Tập 1",
+      "slug": "dragon-ball-tap-1",
+      "isbn": "9786042273016",
+      "import_price": 15000,
+      "price": 30000,
+      "sale_price": 24000,
+      "stock": 90,
+      "sold_quantity": 560,
+      "publication_year": 2024,
+      "num_pages": 192,
+      "cover_type": "Bìa mềm",
+      "dimensions": "11.3 x 17.6 cm",
+      "weight": 180,
+      "description": "Cuộc gặp gỡ huyền thoại giữa cậu bé đuôi khỉ Son Goku và cô gái Bulma bắt đầu hành trình tìm kiếm 7 viên ngọc rồng.",
+      "is_featured": 1,
+      "is_new": 0,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 9,
+      "category_id": 12,
+      "author_id": 5,
+      "publisher_id": 1,
+      "title": "Cho Tôi Xin Một Vé Đi Tuổi Thơ",
+      "slug": "cho-toi-xin-mot-ve-di-tuoi-tho",
+      "isbn": "9786042274006",
+      "import_price": 45000,
+      "price": 85000,
+      "sale_price": 68000,
+      "stock": 110,
+      "sold_quantity": 1350,
+      "publication_year": 2024,
+      "num_pages": 212,
+      "cover_type": "Bìa mềm",
+      "dimensions": "13 x 20 cm",
+      "weight": 260,
+      "description": "Tác phẩm đưa người đọc trở lại những ký ức tuổi thơ trong trẻo, hồn nhiên qua góc nhìn của chú bé Cu Mùi và bạn bè.",
+      "is_featured": 1,
+      "is_new": 0,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 10,
+      "category_id": 12,
+      "author_id": 6,
+      "publisher_id": 1,
+      "title": "Dế Mèn Phiêu Lưu Ký (Màu Bìa Cứng Special)",
+      "slug": "de-men-phieu-luu-ky-dac-biet",
+      "isbn": "9786042274013",
+      "import_price": 80000,
+      "price": 160000,
+      "sale_price": 128000,
+      "stock": 60,
+      "sold_quantity": 430,
+      "publication_year": 2024,
+      "num_pages": 160,
+      "cover_type": "Bìa cứng",
+      "dimensions": "18 x 25 cm",
+      "weight": 450,
+      "description": "Ấn bản đặc biệt mừng kỷ niệm với minh họa màu đẹp rực rỡ. Cuộc phiêu lưu bất hủ của chú Dế Mèn tự do và giàu lòng nhân ái.",
+      "is_featured": 1,
+      "is_new": 1,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 11,
+      "category_id": 4,
+      "author_id": 7,
+      "publisher_id": 2,
+      "title": "Đắc Nhân Tâm (How to Win Friends and Influence People)",
+      "slug": "dac-nhan-tam",
+      "isbn": "9786042275003",
+      "import_price": 50000,
+      "price": 110000,
+      "sale_price": 88000,
+      "stock": 250,
+      "sold_quantity": 3400,
+      "publication_year": 2024,
+      "num_pages": 320,
+      "cover_type": "Bìa mềm",
+      "dimensions": "14.5 x 20.5 cm",
+      "weight": 350,
+      "description": "Cuốn sách bán chạy nhất mọi thời đại về nghệ thuật ứng xử, thu phục lòng người và gieo mầm thành công trong cuộc sống.",
+      "is_featured": 1,
+      "is_new": 0,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    },
+    {
+      "id": 12,
+      "category_id": 12,
+      "author_id": 5,
+      "publisher_id": 1,
+      "title": "Tôi Thấy Hoa Vàng Trên Cỏ Xanh",
+      "slug": "toi-thay-hoa-vang-tren-co-xanh",
+      "isbn": "9786042274020",
+      "import_price": 50000,
+      "price": 95000,
+      "sale_price": 76000,
+      "stock": 140,
+      "sold_quantity": 1120,
+      "publication_year": 2024,
+      "num_pages": 300,
+      "cover_type": "Bìa mềm",
+      "dimensions": "13 x 20 cm",
+      "weight": 320,
+      "description": "Câu chuyện về tình anh em, tình làng nghĩa xóm cùng những rung động đầu đời bình dị miền quê nghèo Việt Nam.",
+      "is_featured": 1,
+      "is_new": 0,
+      "is_bestseller": 1,
+      "status": "ACTIVE",
+      "deleted_at": null
+    }
+  ],
+  "book_images": [
+    {
+      "id": 1,
+      "book_id": 1,
+      "image_url": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 2,
+      "book_id": 2,
+      "image_url": "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 3,
+      "book_id": 3,
+      "image_url": "https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 4,
+      "book_id": 4,
+      "image_url": "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 5,
+      "book_id": 5,
+      "image_url": "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 6,
+      "book_id": 6,
+      "image_url": "https://images.unsplash.com/photo-1629992101753-56d196c8aced?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 7,
+      "book_id": 7,
+      "image_url": "https://images.unsplash.com/photo-1516979187457-637abb4f9353?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 8,
+      "book_id": 8,
+      "image_url": "https://images.unsplash.com/photo-1541963463532-d68292c34b19?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 9,
+      "book_id": 9,
+      "image_url": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 10,
+      "book_id": 10,
+      "image_url": "https://images.unsplash.com/photo-1495640388908-05fa85288e61?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 11,
+      "book_id": 11,
+      "image_url": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    },
+    {
+      "id": 12,
+      "book_id": 12,
+      "image_url": "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&q=80&w=800",
+      "is_primary": 1
+    }
+  ],
+  "promotions": [
+    {
+      "id": 1,
+      "code": "KIMDONG20",
+      "title": "Giảm 20% cho đơn hàng từ 150k",
+      "discount_type": "PERCENTAGE",
+      "discount_value": 20,
+      "min_order_value": 150000,
+      "max_discount": 50000,
+      "is_active": 1
+    },
+    {
+      "id": 2,
+      "code": "FREESHIP30",
+      "title": "Miễn phí vận chuyển đơn từ 200k",
+      "discount_type": "FIXED_AMOUNT",
+      "discount_value": 20000,
+      "min_order_value": 200000,
+      "max_discount": 20000,
+      "is_active": 1
+    }
+  ],
+  "carts": [
+    {
+      "id": 1,
+      "created_at": "2026-09-15T02:01:52.751Z",
+      "user_id": null,
+      "session_id": "sess_3zrfzrlkio5mu210fvh"
+    }
+  ],
+  "cart_items": [
+    {
+      "id": 1,
+      "created_at": "2026-09-15T02:11:21.372Z",
+      "cart_id": 1,
+      "book_id": 4,
+      "quantity": 12
+    }
+  ],
+  "orders": [
+    {
+      "id": 1,
+      "order_code": "DH202609001",
+      "user_id": 3,
+      "customer_name": "Nguyễn Văn An",
+      "customer_email": "khachhang@gmail.com",
+      "customer_phone": "0987654321",
+      "shipping_address": "123 Nguyễn Trãi",
+      "shipping_province": "TP. Hồ Chí Minh",
+      "shipping_district": "Quận 1",
+      "shipping_ward": "Bến Thành",
+      "subtotal": 120000,
+      "discount_amount": 20000,
+      "shipping_fee": 20000,
+      "total_amount": 120000,
+      "payment_method": "COD",
+      "payment_status": "UNPAID",
+      "order_status": "DELIVERED",
+      "created_at": "2026-09-10T10:15:00.000Z",
+      "items": [
+        {
+          "id": 1,
+          "order_id": 1,
+          "book_id": 1,
+          "book_title": "Doraemon - Tập 1 (Tái Bản 2024)",
+          "book_image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=800",
+          "price": 20000,
+          "quantity": 2,
+          "total_price": 40000
+        },
+        {
+          "id": 2,
+          "order_id": 1,
+          "book_id": 4,
+          "book_title": "Thám Tử Lừng Danh Conan - Tập 100",
+          "book_image": "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=800",
+          "price": 24000,
+          "quantity": 2,
+          "total_price": 48000
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "order_code": "DH202609002",
+      "user_id": 3,
+      "customer_name": "Nguyễn Văn An",
+      "customer_email": "khachhang@gmail.com",
+      "customer_phone": "0987654321",
+      "shipping_address": "123 Nguyễn Trãi",
+      "shipping_province": "TP. Hồ Chí Minh",
+      "shipping_district": "Quận 1",
+      "shipping_ward": "Bến Thành",
+      "subtotal": 148000,
+      "discount_amount": 0,
+      "shipping_fee": 20000,
+      "total_amount": 168000,
+      "payment_method": "BANKING",
+      "payment_status": "PAID",
+      "order_status": "SHIPPING",
+      "created_at": "2026-09-14T14:30:00.000Z",
+      "items": [
+        {
+          "id": 3,
+          "order_id": 2,
+          "book_id": 9,
+          "book_title": "Cho Tôi Xin Một Vé Đi Tuổi Thơ",
+          "book_image": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800",
+          "price": 68000,
+          "quantity": 1,
+          "total_price": 68000
+        },
+        {
+          "id": 4,
+          "order_id": 2,
+          "book_id": 11,
+          "book_title": "Đắc Nhân Tâm",
+          "book_image": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800",
+          "price": 80000,
+          "quantity": 1,
+          "total_price": 80000
+        }
+      ]
+    }
+  ],
+  "order_items": [
+    {
+      "id": 1,
+      "order_id": 1,
+      "book_id": 1,
+      "book_title": "Doraemon - Tập 1 (Tái Bản 2024)",
+      "book_image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=800",
+      "price": 20000,
+      "quantity": 2,
+      "total_price": 40000
+    },
+    {
+      "id": 2,
+      "order_id": 1,
+      "book_id": 4,
+      "book_title": "Thám Tử Lừng Danh Conan - Tập 100",
+      "book_image": "https://images.unsplash.com/photo-1532012197267-da84d127e765?auto=format&fit=crop&q=80&w=800",
+      "price": 24000,
+      "quantity": 2,
+      "total_price": 48000
+    },
+    {
+      "id": 3,
+      "order_id": 2,
+      "book_id": 9,
+      "book_title": "Cho Tôi Xin Một Vé Đi Tuổi Thơ",
+      "book_image": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=800",
+      "price": 68000,
+      "quantity": 1,
+      "total_price": 68000
+    },
+    {
+      "id": 4,
+      "order_id": 2,
+      "book_id": 11,
+      "book_title": "Đắc Nhân Tâm",
+      "book_image": "https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800",
+      "price": 80000,
+      "quantity": 1,
+      "total_price": 80000
+    }
+  ],
+  "reviews": [
+    {
+      "id": 1,
+      "book_id": 1,
+      "user_id": 3,
+      "user_name": "Nguyễn Văn An",
+      "rating": 5,
+      "comment": "Truyện in rất nét, giấy thơm, đóng gói bọc kỹ càng!",
+      "status": "APPROVED"
+    },
+    {
+      "id": 2,
+      "book_id": 4,
+      "user_id": 3,
+      "user_name": "Nguyễn Văn An",
+      "rating": 5,
+      "comment": "Tập 100 Conan đỉnh cao! Giao hàng siêu nhanh.",
+      "status": "APPROVED"
+    },
+    {
+      "id": 3,
+      "book_id": 9,
+      "user_id": 3,
+      "user_name": "Nguyễn Văn An",
+      "rating": 5,
+      "comment": "Sách hay và giàu cảm xúc, giao hàng trong 2 ngày.",
+      "status": "APPROVED"
+    }
+  ],
+  "wishlists": []
+}

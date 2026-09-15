@@ -1,0 +1,19 @@
+{
+  "name": "book-store-system",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Website Bán Sách Trực Tuyến & Quản Lý Sách - NXB Kim Đồng Reference UI",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "build:server": "npm run build --prefix server",
+    "build:client": "npm run build --prefix client",
+    "build": "npm run build:server && npm run build:client",
+    "start": "npm run start --prefix server"
+  }
+}
