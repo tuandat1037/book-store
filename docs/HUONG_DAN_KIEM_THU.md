@@ -93,7 +93,7 @@ Kết quả cuối cùng trông như sau:
 | `-DbName` | `kimdong_bookstore_test` | Tên database kiểm thử |
 | `-SkipReset` | tắt | Bỏ qua bước khôi phục database, chạy nhanh hơn |
 | `-Report` | `tests\KET_QUA_KIEM_THU.md` | Nơi xuất báo cáo |
-| `-Runner` | `api-tests.mjs` | Chọn bộ kiểm thử sẽ chạy |
+| `-Runner` | `api-tests.mjs` | Chọn bộ kiểm thử: `api-tests.mjs`, `run-postman.mjs`, `unit-tests.mjs`, `both` |
 
 ### 3.2. Ví dụ
 
@@ -107,9 +107,41 @@ Kết quả cuối cùng trông như sau:
 # Chạy cả hai bộ liên tiếp
 .\run-tests.ps1 -Runner both
 
+# Chạy kiểm thử đơn vị (nhanh, không cần MySQL)
+.\run-tests.ps1 -Runner unit-tests.mjs
+
 # Chạy lại nhanh, không khôi phục database
 .\run-tests.ps1 -SkipReset
 ```
+
+### 3.3. Kiểm thử đơn vị (Unit Test)
+
+Ngoài bộ kiểm thử API (cần MySQL + server), dự án có thêm bộ **kiểm thử đơn vị**
+kiểm tra từng hàm riêng lẻ trực tiếp trong bộ nhớ — **không cần MySQL, không cần
+bật server**, chạy xong trong vài giây:
+
+```powershell
+cd tests
+.\run-tests.ps1 -Runner unit-tests.mjs
+```
+
+Hoặc chạy trực tiếp:
+
+```powershell
+cd tests
+node unit-tests.mjs
+```
+
+Bộ này gồm **48 test case** cho 3 nhóm hàm thuần túy:
+
+| Nhóm | Hàm | Số ca |
+| --- | --- | --- |
+| Định dạng hiển thị | `formatVND`, `formatDate`, `calculateDiscountPercent` | 16 |
+| Trạng thái tồn kho | `getStockStatus`, `LOW_STOCK_THRESHOLD` | 12 |
+| Mã khuyến mãi | `evaluatePromotion` | 20 |
+
+Kết quả được xuất ra màn hình và ghi vào `tests/KET_QUA_KIEM_THU_DON_VI.md`.
+Chi tiết kết quả gần nhất xem [Kết quả kiểm thử đơn vị](../tests/KET_QUA_KIEM_THU_DON_VI.md).
 
 ---
 

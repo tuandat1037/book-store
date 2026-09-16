@@ -182,7 +182,7 @@ Tổng: **12 sách**, tất cả ở trạng thái `ACTIVE`.
 |---|---|---|---|---|
 | **1** | **API / Tích hợp** | 65 endpoint, toàn bộ nghiệp vụ | Postman + Newman, script Node | **60%** |
 | **2** | **Giao diện (thủ công)** | Các màn hình chính | Thủ công + ảnh chụp | **30%** |
-| **3** | **Đơn vị (Unit)** | Hàm thuần | Vitest | **10%** |
+| **3** | **Đơn vị (Unit)** | Hàm thuần | Script Node tự viết (không cần cài thêm) | **10%** |
 
 ### 5.2 Lý do chọn API test làm trọng tâm
 
@@ -197,13 +197,21 @@ Backend là **REST API thuần**, toàn bộ logic nghiệp vụ (tính tiền, 
 
 Logic nghiệp vụ nằm rải trong controller kết hợp câu lệnh SQL trực tiếp, **không tách thành hàm thuần** nên khó unit test. Do đó chỉ unit test các hàm tiện ích thật sự thuần:
 
-| Hàm | Vị trí | Nội dung kiểm thử |
-|---|---|---|
-| `formatVND()` | `client/src/utils/format.ts` | Định dạng tiền tệ VNĐ |
-| `calculateDiscountPercent()` | `client/src/utils/format.ts` | Tính % giảm giá |
-| `getStockStatus()` | `server/src/config/constants.ts` | Phân loại tồn kho theo ngưỡng 100 |
-| Tính phí vận chuyển | `server/src/controllers/orderController.ts` | Miễn phí ≥ 200.000đ, ngược lại 20.000đ |
-| Tính tổng tiền | `server/src/controllers/orderController.ts` | `max(0, tạm tính − giảm giá + phí ship)` |
+| Hàm | Vị trí | Nội dung kiểm thử | Trạng thái |
+|---|---|---|---|
+| `formatVND()` | `client/src/utils/format.ts` | Định dạng tiền tệ VNĐ | **Đã kiểm thử** |
+| `formatDate()` | `client/src/utils/format.ts` | Định dạng ngày giờ, xử lý chuỗi rỗng | **Đã kiểm thử** |
+| `calculateDiscountPercent()` | `client/src/utils/format.ts` | Tính % giảm giá | **Đã kiểm thử** |
+| `getStockStatus()` | `server/src/config/constants.ts` | Phân loại tồn kho theo ngưỡng 100 | **Đã kiểm thử** |
+| `evaluatePromotion()` | `server/src/controllers/promotionController.ts` | Duyệt mã khuyến mãi: hạn dùng, lượt dùng, đơn tối thiểu, trần giảm | **Đã kiểm thử** |
+| Tính phí vận chuyển | `server/src/controllers/orderController.ts` | Miễn phí ≥ 200.000đ, ngược lại 20.000đ | Chưa tách hàm riêng |
+| Tính tổng tiền | `server/src/controllers/orderController.ts` | `max(0, tạm tính − giảm giá + phí ship)` | Chưa tách hàm riêng |
+
+**Kết quả:** 48/48 ca đạt (100%) — xem [Kết quả kiểm thử đơn vị](../tests/KET_QUA_KIEM_THU_DON_VI.md).
+
+Hai mục cuối (phí vận chuyển, tổng tiền) hiện nằm lẫn trong `createOrder` nên
+chưa tách riêng để gọi trực tiếp được. Đây là hướng mở rộng tiếp theo: tách thành
+hàm thuần `calculateShippingFee()` và `calculateOrderTotal()` rồi bổ sung test.
 
 ### 5.4 Kỹ thuật thiết kế test case
 
@@ -249,6 +257,7 @@ Logic nghiệp vụ nằm rải trong controller kết hợp câu lệnh SQL tr�
 - Tỷ lệ đạt **≥ 95%**.
 - **Không còn lỗi mức nghiêm trọng (Critical) hoặc cao (High)** chưa xử lý.
 - Toàn bộ 65 endpoint đã được kiểm thử ít nhất một lần.
+- Các hàm thuần túy chính đã có kiểm thử đơn vị.
 - Báo cáo kết quả kiểm thử đã hoàn thành.
 
 ### 6.3 Tiêu chí tạm dừng (Suspend Criteria)
@@ -264,7 +273,8 @@ Logic nghiệp vụ nằm rải trong controller kết hợp câu lệnh SQL tr�
 | Tỷ lệ đạt | ≥ 95% | 100% (253/253 và 601/601) | **Đạt** |
 | Lỗi Critical/High còn tồn | 0 | 0 — 5 lỗi phát hiện đều đã sửa và kiểm thử lại | **Đạt** |
 | Endpoint được kiểm thử | 65/65 | 65/65 | **Đạt** |
-| Báo cáo kết quả | Đã hoàn thành | `tests/KET_QUA_KIEM_THU.md` và `tests/KET_QUA_POSTMAN.md` | **Đạt** |
+| Kiểm thử đơn vị hàm thuần | Có | 48/48 ca đạt (100%) | **Đạt** |
+| Báo cáo kết quả | Đã hoàn thành | `tests/KET_QUA_KIEM_THU.md`, `tests/KET_QUA_POSTMAN.md`, `tests/KET_QUA_KIEM_THU_DON_VI.md` | **Đạt** |
 
 **5 lỗi thực tế phát hiện được và đã sửa trong mã nguồn:**
 
@@ -327,7 +337,7 @@ tra tồn kho trước khi xác nhận, và phân tích giá trị biên của l
 | 4 | Xây dựng bộ API test tự động | 2 ngày | Postman collection + script Node | **Xong** |
 | 5 | Thực thi API test, ghi nhận lỗi | 2 ngày | Nhật ký lỗi | **Xong** — 253/253 và 601/601 đạt |
 | 6 | Kiểm thử giao diện thủ công | 2 ngày | Ảnh chụp + kết quả | Chờ thực hiện |
-| 7 | Unit test các hàm tiện ích | 1 ngày | Báo cáo độ phủ | Chờ thực hiện |
+| 7 | Unit test các hàm tiện ích | 1 ngày | Báo cáo độ phủ | **Xong** — 48/48 đạt |
 | 8 | Kiểm thử lại sau khi sửa lỗi | 1 ngày | Kết quả vòng 2 | **Xong** — 5 lỗi đã sửa và xác nhận |
 | 9 | Tổng hợp báo cáo kết quả | 1 ngày | Test Summary | **Xong** |
 | | **Tổng** | **~13,5 ngày** | | |
@@ -369,7 +379,9 @@ tra tồn kho trước khi xác nhận, và phân tích giá trị biên của l
 | 5 | Script chạy kiểm thử tự động | PowerShell | **Đã có** — `tests/run-tests.ps1` |
 | 6 | Báo cáo kết quả kiểm thử | Markdown | **Đã có** — `tests/KET_QUA_KIEM_THU.md`, `tests/KET_QUA_POSTMAN.md` |
 | 7 | Nhật ký lỗi | Markdown | **Đã có** — nằm trong báo cáo kết quả |
-| 8 | Ảnh chụp minh hoạ kiểm thử giao diện | Thư mục ảnh | Chờ thực hiện |
+| 8 | Bộ kiểm thử đơn vị (48 test case) | Script `.mjs` | **Đã có** — `tests/unit-tests.mjs` |
+| 9 | Báo cáo kết quả kiểm thử đơn vị | Markdown | **Đã có** — `tests/KET_QUA_KIEM_THU_DON_VI.md` |
+| 10 | Ảnh chụp minh hoạ kiểm thử giao diện | Thư mục ảnh | Chờ thực hiện |
 
 ---
 

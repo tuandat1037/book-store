@@ -2,7 +2,7 @@
 
 **Dự án:** Website Bán Sách Trực Tuyến — NXB Kim Đồng  
 **Địa chỉ API:** `http://localhost:5099/api`  
-**Thời điểm chạy:** 17:50:50 16/9/2026  
+**Thời điểm chạy:** 23:00:26 16/9/2026  
 **Công cụ:** Bộ kiểm thử tự động `tests/api-tests.mjs`
 
 ---
@@ -165,7 +165,7 @@
 | TC-CART-14 | Giỏ hàng | Xoá nhiều sản phẩm cùng lúc | HTTP 200 | 200 | ✅ Đạt |
 | TC-CART-16 | Giỏ hàng | Xoá nhiều sản phẩm với danh sách rỗng | HTTP 400 | 400 | ✅ Đạt |
 | TC-CART-15 | Giỏ hàng | Giỏ tách riêng theo người dùng | Giỏ khách khác không bị ảnh hưởng | true | ✅ Đạt |
-| TC-ORD-01 | Đơn hàng | Đặt hàng thành công | HTTP 201 + có mã đơn | {"status":201,"code":"DH5585031690"} | ✅ Đạt |
+| TC-ORD-01 | Đơn hàng | Đặt hàng thành công | HTTP 201 + có mã đơn | {"status":201,"code":"DH7442580315"} | ✅ Đạt |
 | TC-ORD-02 | Đơn hàng | Tồn kho bị trừ NGAY khi đặt hàng | Sách 3 giảm 5 cuốn (80 → 75) | 75 | ✅ Đạt |
 | TC-ORD-03 | Đơn hàng | Đơn mới ở trạng thái CHỜ XÁC NHẬN | PENDING | PENDING | ✅ Đạt |
 | TC-ORD-04 | Đơn hàng | Xem danh sách đơn hàng | HTTP 200 + có dữ liệu | {"status":200,"count":3} | ✅ Đạt |
@@ -186,7 +186,7 @@
 | TC-ORD-18 | Đơn hàng | Huỷ đơn ở trạng thái ĐANG GIAO | HTTP 200 | 200 | ✅ Đạt |
 | TC-ORD-19 | Đơn hàng | Đơn chuyển sang ĐÃ HUỶ | CANCELLED | CANCELLED | ✅ Đạt |
 | TC-ORD-20 | Đơn hàng | Lý do huỷ được lưu lại | Đúng lý do đã nhập | Khách hàng yêu cầu hủy đơn | ✅ Đạt |
-| TC-ORD-21 | Đơn hàng | Thời điểm huỷ được ghi nhận | Có cancelled_at | 2026-09-16T10:50:50.000Z | ✅ Đạt |
+| TC-ORD-21 | Đơn hàng | Thời điểm huỷ được ghi nhận | Có cancelled_at | 2026-09-16T16:00:25.000Z | ✅ Đạt |
 | TC-ORD-22 | Đơn hàng | HOÀN LẠI tồn kho sách 3 (5 cuốn) | Sách 3 về 80 | 80 | ✅ Đạt |
 | TC-ORD-23 | Đơn hàng | HOÀN LẠI tồn kho sách 7 (3 cuốn) | Sách 7 về 180 | 180 | ✅ Đạt |
 | TC-ORD-24 | Đơn hàng | Huỷ đơn lần thứ hai bị từ chối | HTTP 400 | 400 | ✅ Đạt |

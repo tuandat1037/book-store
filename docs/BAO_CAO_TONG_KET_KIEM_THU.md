@@ -20,6 +20,7 @@ của hệ thống. Kết quả:
 | Test case không đạt | **0** |
 | Tỷ lệ đạt | **100%** |
 | Bộ sưu tập Postman (kiểm tra bổ sung) | **601 / 601** đạt |
+| Bộ kiểm thử đơn vị (hàm thuần túy) | **48 / 48** đạt |
 | Lỗi phát hiện | **5** |
 | Lỗi đã khắc phục và kiểm thử lại | **5** |
 | Lỗi tồn đọng mức Critical / High | **0** |
@@ -207,12 +208,37 @@ Toàn bộ **65 endpoint** đã được gọi ít nhất một lần, trong đ�
 | Kiểm thử dữ liệu tiếng Việt | 4 |
 | Còn lại (kiểm thử hồi quy, dọn dẹp) | 52 |
 
-### 5.3 Phần chưa được kiểm thử tự động
+### 5.3 Kiểm thử đơn vị (Unit Test)
+
+Bổ sung đợt **kiểm thử đơn vị** cho các hàm thuần túy — hàm không phụ thuộc
+database hay giao diện, gọi trực tiếp trong bộ nhớ nên chạy rất nhanh và xác
+định chính xác chỗ sai:
+
+| Nhóm | Hàm kiểm thử | Vị trí | Số ca | Kết quả |
+| --- | --- | --- | ---: | --- |
+| Định dạng hiển thị | `formatVND`, `formatDate`, `calculateDiscountPercent` | `client/src/utils/format.ts` | 16 | 16/16 |
+| Trạng thái tồn kho | `getStockStatus`, `LOW_STOCK_THRESHOLD` | `server/src/config/constants.ts` | 12 | 12/12 |
+| Mã khuyến mãi | `evaluatePromotion` | `server/src/controllers/promotionController.ts` | 20 | 20/20 |
+| **Tổng** | | | **48** | **48/48 (100%)** |
+
+Trọng tâm các ca kiểm thử: giá trị biên (0, 1, đúng ngưỡng, trên ngưỡng một đơn
+vị), dữ liệu bất thường (số âm, chuỗi rác, `null`, `undefined`), và kết hợp nhiều
+điều kiện nghiệp vụ cùng lúc (khuyến mãi vừa có trần giảm, vừa có đơn tối thiểu,
+vừa giới hạn lượt dùng).
+
+Trong quá trình soạn test, có 1 ca kiểm thử ban đầu kỳ vọng sai (giá khuyến mãi
+= 0 tưởng là "giảm 100%"), nhưng đối chiếu cách dùng thực tế trong giao diện
+(`sale_price = 0` nghĩa là "không khuyến mãi", xem `AdminBooksPage.tsx` dòng 74)
+cho thấy code trả về 0% là **đúng**. Không phát hiện lỗi hàm nào cần khắc phục.
+
+Chi tiết từng ca: [Kết quả kiểm thử đơn vị](../tests/KET_QUA_KIEM_THU_DON_VI.md).
+
+### 5.4 Phần chưa được kiểm thử tự động
 
 | Phần | Lý do | Cách kiểm thử đề xuất |
 | --- | --- | --- |
 | Giao diện người dùng | Không có công cụ tự động hoá trình duyệt trong dự án | Kiểm thử thủ công theo kịch bản §12 Kế hoạch kiểm thử |
-| Hàm tiện ích thuần | Chưa cài Vitest | Bổ sung unit test (giai đoạn 7) |
+| Component React (một số) | Chưa có thư viện render/test component | Có thể mở rộng kiểm thử đơn vị bằng Vitest + React Testing Library |
 | Hiệu năng khi tải cao | Ngoài phạm vi đợt này | Dùng công cụ đo tải riêng |
 | Khả năng truy cập (accessibility) | Ngoài phạm vi đợt này | Kiểm tra bằng công cụ chuyên dụng |
 
@@ -233,7 +259,9 @@ Toàn bộ **65 endpoint** đã được gọi ít nhất một lần, trong đ�
 | 9 | Script khôi phục database kiểm thử | `tests/reset-test-db.ps1` |
 | 10 | Báo cáo kết quả bộ 253 test case | `tests/KET_QUA_KIEM_THU.md` |
 | 11 | Báo cáo kết quả bộ sưu tập Postman | `tests/KET_QUA_POSTMAN.md` |
-| 12 | Báo cáo tổng kết kiểm thử | Tài liệu này |
+| 12 | Bộ kiểm thử đơn vị (48 test case) | `tests/unit-tests.mjs` |
+| 13 | Báo cáo kết quả kiểm thử đơn vị | `tests/KET_QUA_KIEM_THU_DON_VI.md` |
+| 14 | Báo cáo tổng kết kiểm thử | Tài liệu này |
 
 ---
 
@@ -249,7 +277,9 @@ Toàn bộ **65 endpoint** đã được gọi ít nhất một lần, trong đ�
    được kiểm chứng đầy đủ, không phát hiện lỗ hổng phân quyền.
 4. **Năm lỗi đã được phát hiện và khắc phục**, tất cả đều ở tầng kiểm tra dữ liệu
    đầu vào — loại lỗi mà kiểm thử thủ công trên giao diện rất dễ bỏ sót.
-5. **Không còn lỗi tồn đọng mức Critical hoặc High.**
+5. **Các hàm thuần túy (định dạng, tồn kho, khuyến mãi) cho kết quả đúng** ở mọi
+   trường hợp kiểm thử, kể cả giá trị biên và dữ liệu bất thường: **48/48 (100%)**.
+6. **Không còn lỗi tồn đọng mức Critical hoặc High.**
 
 ### 7.2 Kiến nghị
 
@@ -259,14 +289,16 @@ Toàn bộ **65 endpoint** đã được gọi ít nhất một lần, trong đ�
    hàng và chi tiết đơn hàng, để tầng dữ liệu cũng bảo vệ được.
 3. **Đưa bộ kiểm thử vào quy trình tự động.** Chạy `tests/run-tests.ps1` trước mỗi
    lần gộp mã nguồn để phát hiện hồi quy sớm.
-4. **Bổ sung unit test** cho các hàm tiện ích thuần (giai đoạn 7 trong kế hoạch).
+4. **Mở rộng kiểm thử đơn vị tới các hàm thuần túy khác** (ví dụ tính phí vận
+   chuyển, tổng tiền đơn hàng) và xét cài Vitest để test component React.
 5. **Thực hiện kiểm thử giao diện thủ công** theo kịch bản đã soạn, kèm ảnh chụp
    minh hoạ (giai đoạn 6 trong kế hoạch).
 
 ### 7.3 Đề xuất chuyển giai đoạn
 
-Tầng API đã **đạt** tiêu chí kết thúc. Đề xuất chuyển sang **kiểm thử giao diện
-thủ công** (giai đoạn 6) và **unit test** (giai đoạn 7).
+Tầng API và kiểm thử đơn vị đều **đạt** tiêu chí kết thúc. Đề xuất chuyển sang
+**kiểm thử giao diện thủ công** (giai đoạn 6) và mở rộng unit test cho các hàm
+còn lại.
 
 ---
 
@@ -279,9 +311,13 @@ thủ công** (giai đoạn 6) và **unit test** (giai đoạn 7).
 cd tests
 .\run-tests.ps1 -Runner both
 
-# 3. Xem báo cáo
+# 3. Chạy kiểm thử đơn vị (không cần MySQL, vài giây)
+.\run-tests.ps1 -Runner unit-tests.mjs
+
+# 4. Xem báo cáo
 notepad KET_QUA_KIEM_THU.md
 notepad KET_QUA_POSTMAN.md
+notepad KET_QUA_KIEM_THU_DON_VI.md
 ```
 
 **Môi trường đã dùng:**

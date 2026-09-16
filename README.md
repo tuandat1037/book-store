@@ -125,6 +125,13 @@ cd tests
 Script sẽ tự khôi phục database kiểm thử, biên dịch backend, bật server ở cổng
 5099, chạy **253 test case**, tắt server và xuất báo cáo.
 
+Kiểm thử đơn vị (không cần MySQL, chạy trong vài giây):
+
+```powershell
+cd tests
+.\run-tests.ps1 -Runner unit-tests.mjs
+```
+
 | Tài liệu | Nội dung |
 | --- | --- |
 | [Kế hoạch kiểm thử](docs/KE_HOACH_KIEM_THU.md) | Phạm vi, chiến lược, tiêu chí, lịch trình |
@@ -132,6 +139,7 @@ Script sẽ tự khôi phục database kiểm thử, biên dịch backend, bật
 | [Báo cáo tổng kết](docs/BAO_CAO_TONG_KET_KIEM_THU.md) | Kết luận, lỗi đã sửa, mức độ bao phủ |
 | [Kết quả kiểm thử](tests/KET_QUA_KIEM_THU.md) | Báo cáo kết quả bộ 253 test case |
 | [Kết quả Postman](tests/KET_QUA_POSTMAN.md) | Báo cáo kết quả bộ sưu tập Postman |
+| [Kết quả kiểm thử đơn vị](tests/KET_QUA_KIEM_THU_DON_VI.md) | Báo cáo kết quả bộ 48 test case đơn vị |
 
 Chi tiết xem [Hướng dẫn kiểm thử](docs/HUONG_DAN_KIEM_THU.md).
 

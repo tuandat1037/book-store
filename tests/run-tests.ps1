@@ -26,13 +26,15 @@
     Bộ kiểm thử sẽ chạy:
       api-tests.mjs   (mặc định) bộ 253 test case viết bằng Node
       run-postman.mjs            chạy bộ sưu tập Postman (mô phỏng Newman)
-      both                       chạy lần lượt cả hai
+      unit-tests.mjs             kiểm thử đơn vị (không cần server, không cần MySQL)
+      both                       chạy lần lượt api-tests.mjs và run-postman.mjs
 
 .EXAMPLE
     .\run-tests.ps1
     .\run-tests.ps1 -Port 5099
     .\run-tests.ps1 -SkipReset
     .\run-tests.ps1 -Runner run-postman.mjs
+    .\run-tests.ps1 -Runner unit-tests.mjs
     .\run-tests.ps1 -Runner both
 #>
 param(
@@ -50,6 +52,21 @@ $Root     = Resolve-Path (Join-Path $TestsDir '..')
 $ServerDir = Join-Path $Root 'server'
 
 if (-not $Report) { $Report = Join-Path $TestsDir 'KET_QUA_KIEM_THU.md' }
+
+# ------------------------------------------- Kiểm thử đơn vị (chạy riêng) ---
+# Kiểm thử đơn vị chỉ gọi hàm trực tiếp trong bộ nhớ: không cần MySQL, không cần
+# khởi động server. Vì vậy chạy riêng một nhánh để nhanh và không phụ thuộc gì.
+if ($Runner -eq 'unit-tests.mjs') {
+    Write-Host ""
+    Write-Host "================================================================" -ForegroundColor Cyan
+    Write-Host "   KIỂM THỬ ĐƠN VỊ - WEBSITE BÁN SÁCH NXB KIM ĐỒNG" -ForegroundColor Cyan
+    Write-Host "================================================================" -ForegroundColor Cyan
+    Write-Host ""
+    Write-Host "Không cần MySQL, không cần khởi động server." -ForegroundColor DarkGray
+    Write-Host ""
+    & node (Join-Path $TestsDir 'unit-tests.mjs')
+    exit $LASTEXITCODE
+}
 
 Write-Host ""
 Write-Host "================================================================" -ForegroundColor Cyan
