@@ -14,6 +14,16 @@ export async function register(req: Request, res: Response) {
       return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin bắt buộc' });
     }
 
+    // Kiểm tra định dạng email và độ dài mật khẩu ngay tại server.
+    // (Trước đây chỉ kiểm tra ở giao diện nên gọi thẳng API vẫn tạo được
+    //  tài khoản với email rác hoặc mật khẩu 1-2 ký tự.)
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim())) {
+      return res.status(400).json({ message: 'Email không hợp lệ' });
+    }
+    if (String(password).length < 6) {
+      return res.status(400).json({ message: 'Mật khẩu tối thiểu 6 ký tự' });
+    }
+
     const existingUser = await queryOne('SELECT id FROM users WHERE email = ?', [email]);
     if (existingUser) {
       return res.status(400).json({ message: 'Email này đã được đăng ký tài khoản' });
@@ -114,9 +124,28 @@ export async function updateProfile(req: AuthRequest, res: Response) {
     if (!req.user) return res.status(401).json({ message: 'Chưa xác thực' });
     const { full_name, phone, address, province, district, ward } = req.body;
 
+    // Cho phép cập nhật một phần: trường nào không gửi thì giữ nguyên giá trị cũ.
+    // (mysql2 không nhận `undefined` nên phải quy về null rồi dùng COALESCE,
+    //  nếu không sẽ ném lỗi bind và trả về 500.)
     await query(
-      'UPDATE users SET full_name = ?, phone = ?, address = ?, province = ?, district = ?, ward = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [full_name, phone, address, province, district, ward, req.user.id]
+      `UPDATE users SET
+        full_name = COALESCE(?, full_name),
+        phone = COALESCE(?, phone),
+        address = COALESCE(?, address),
+        province = COALESCE(?, province),
+        district = COALESCE(?, district),
+        ward = COALESCE(?, ward),
+        updated_at = CURRENT_TIMESTAMP
+       WHERE id = ?`,
+      [
+        full_name ?? null,
+        phone ?? null,
+        address ?? null,
+        province ?? null,
+        district ?? null,
+        ward ?? null,
+        req.user.id
+      ]
     );
 
     res.json({ message: 'Cập nhật thông tin cá nhân thành công' });

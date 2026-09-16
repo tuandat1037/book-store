@@ -49,9 +49,16 @@ export async function getCart(req: AuthRequest, res: Response) {
 export async function addToCart(req: AuthRequest, res: Response) {
   try {
     const { book_id, quantity } = req.body;
-    const qty = parseInt(quantity) || 1;
     const userId = req.user?.id;
     const sessionId = (req.headers['x-session-id'] as string) || 'guest-session';
+
+    // Số lượng phải là số nguyên dương. Chỉ mặc định 1 khi client KHÔNG gửi trường này.
+    // (Trước đây `parseInt(quantity) || 1` biến số 0 thành 1, còn số âm thì ghi thẳng vào giỏ.)
+    const raw = quantity === undefined || quantity === null || quantity === '' ? 1 : Number(quantity);
+    const qty = raw;
+    if (!Number.isInteger(qty) || qty <= 0) {
+      return res.status(400).json({ message: 'Số lượng phải là số nguyên lớn hơn 0' });
+    }
 
     const book = await queryOne('SELECT * FROM books WHERE id = ? AND status = "ACTIVE"', [book_id]);
     if (!book) return res.status(404).json({ message: 'Sách không tồn tại hoặc đã hết hàng' });

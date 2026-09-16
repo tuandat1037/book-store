@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import apiRouter from './routes/api.js';
-import { initDatabase } from './config/db.js';
+import { initDatabase, printConnectionHelp, getDatabaseInfo } from './config/db.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -48,18 +48,26 @@ app.get('/', (req, res) => {
 app.use('/api', apiRouter);
 
 // Health check endpoint
+// Trả kèm thông tin database để kiểm tra nhanh web đang đọc đúng database nào.
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', time: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    time: new Date().toISOString(),
+    database: getDatabaseInfo()
+  });
 });
 
 // Global Error Handler
 app.use(errorHandler);
 
 // Initialize DB and start server
+// Server chỉ chạy khi kết nối được MySQL. Nếu không, dừng hẳn và in hướng dẫn
+// xử lý — tránh trường hợp web vẫn hiện sách bằng dữ liệu giả gây nhầm lẫn.
 initDatabase().then(() => {
   app.listen(PORT, () => {
-    console.log(`🚀 Kim Dong Bookstore Server listening on http://localhost:${PORT}`);
+    console.log(`Kim Dong Bookstore Server đang chạy tại http://localhost:${PORT}`);
   });
 }).catch((err) => {
-  console.error(' Failed to initialize database:', err);
+  printConnectionHelp(err);
+  process.exit(1);
 });

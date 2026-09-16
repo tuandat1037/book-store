@@ -26,6 +26,16 @@ export async function toggleWishlist(req: AuthRequest, res: Response) {
     if (!req.user) return res.status(401).json({ message: 'Vui lòng đăng nhập để lưu sản phẩm yêu thích' });
     const { book_id } = req.body;
 
+    if (!book_id || !Number.isInteger(Number(book_id)) || Number(book_id) <= 0) {
+      return res.status(400).json({ message: 'Vui lòng chọn sách hợp lệ' });
+    }
+
+    // Phải kiểm tra sách có tồn tại trước khi ghi vào bảng yêu thích.
+    // (Trước đây id sách không tồn tại sẽ vi phạm khoá ngoại và trả về 500.)
+    // Dùng dạng có alias `b.` để engine dự phòng trong bộ nhớ nhận diện được.
+    const book = await queryOne('SELECT b.id, b.deleted_at FROM books b WHERE b.id = ?', [book_id]);
+    if (!book || book.deleted_at) return res.status(404).json({ message: 'Không tìm thấy sách' });
+
     const existing = await queryOne('SELECT id FROM wishlists WHERE user_id = ? AND book_id = ?', [req.user.id, book_id]);
 
     if (existing) {

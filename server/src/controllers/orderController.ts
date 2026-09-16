@@ -23,18 +23,25 @@ export async function createOrder(req: AuthRequest, res: Response) {
     const validatedItems: any[] = [];
 
     for (const item of items) {
+      // Số lượng phải là số nguyên dương. (Trước đây đơn với quantity = 0 vẫn được
+      // tạo thành công vì phép so sánh `book.stock < 0` luôn sai.)
+      const qty = Number(item.quantity);
+      if (!Number.isInteger(qty) || qty <= 0) {
+        return res.status(400).json({ message: 'Số lượng sách trong đơn phải là số nguyên lớn hơn 0' });
+      }
+
       const book = await queryOne('SELECT * FROM books WHERE id = ? AND status = "ACTIVE"', [item.book_id]);
       if (!book) {
         return res.status(400).json({ message: `Sách với ID ${item.book_id} không tồn tại hoặc đã bị ẩn` });
       }
-      if (book.stock < item.quantity) {
+      if (book.stock < qty) {
         return res.status(400).json({ message: `Sách "${book.title}" không đủ số lượng tồn kho (còn ${book.stock})` });
       }
 
       const coverImg = await queryOne('SELECT image_url FROM book_images WHERE book_id = ? ORDER BY is_primary DESC LIMIT 1', [book.id]);
 
       const itemPrice = book.sale_price !== null && book.sale_price < book.price ? book.sale_price : book.price;
-      const itemTotal = itemPrice * item.quantity;
+      const itemTotal = itemPrice * qty;
       subtotal += itemTotal;
 
       validatedItems.push({
@@ -42,7 +49,7 @@ export async function createOrder(req: AuthRequest, res: Response) {
         book_title: book.title,
         book_image: coverImg ? coverImg.image_url : '',
         price: itemPrice,
-        quantity: item.quantity,
+        quantity: qty,
         total_price: itemTotal,
         current_stock: book.stock,
         sold_quantity: book.sold_quantity

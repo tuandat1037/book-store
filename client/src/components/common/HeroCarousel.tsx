@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
 import api from '../../services/api';
 import { Banner } from '../../types';
-import { BANNER_THEMES, FALLBACK_BANNERS } from '../../constants/bannerThemes';
+import { BANNER_THEMES } from '../../constants/bannerThemes';
 
 export const HeroCarousel: React.FC = () => {
-  const [banners, setBanners] = useState<Banner[]>(FALLBACK_BANNERS);
+  // Banner chỉ lấy từ API. Không dùng dữ liệu cứng dự phòng nữa, vì như vậy
+  // banner đã xoá trong database vẫn hiện trên trang chủ.
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [current, setCurrent] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -14,12 +16,13 @@ export const HeroCarousel: React.FC = () => {
     api.get('/banners')
       .then((res) => {
         const list: Banner[] = res.data.banners || [];
-        if (list.length > 0) {
-          setBanners(list);
-          setCurrent(0);
-        }
+        setBanners(list);
+        setCurrent(0);
       })
-      .catch((err) => console.error('Banner fetch failed:', err));
+      .catch((err) => {
+        console.error('Không lấy được banner:', err);
+        setBanners([]);
+      });
   }, []);
 
   useEffect(() => {
