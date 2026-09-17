@@ -15,6 +15,9 @@ export const AdminBooksPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
+  const PAGE_SIZE = 10;
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,10 +41,13 @@ export const AdminBooksPage: React.FC = () => {
     image_url: 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&q=80&w=800'
   });
 
-  const fetchBooks = () => {
+  const fetchBooks = (page = currentPage) => {
     setLoading(true);
-    api.get(`/books?limit=50&q=${encodeURIComponent(searchQuery)}`)
-      .then((res) => setBooks(res.data.books || []))
+    api.get(`/books?limit=${PAGE_SIZE}&page=${page}&q=${encodeURIComponent(searchQuery)}`)
+      .then((res) => {
+        setBooks(res.data.books || []);
+        if (res.data.pagination) setPagination(res.data.pagination);
+      })
       .catch((err) => console.error(err))
       .finally(() => setLoading(false));
   };
@@ -49,13 +55,17 @@ export const AdminBooksPage: React.FC = () => {
   useEffect(() => {
     api.get('/categories').then((r) => setCategories(r.data.raw || []));
     api.get('/authors').then((r) => setAuthors(r.data.authors || [])).catch((e) => console.error(e));
-    fetchBooks();
-  }, [searchQuery]);
+  }, []);
+
+  useEffect(() => {
+    fetchBooks(currentPage);
+  }, [searchQuery, currentPage]);
 
   // Nút "Nhập thêm" từ Dashboard cảnh báo tồn kho chuyển sang đây kèm từ khóa sách
   useEffect(() => {
     const kw = (location.state as any)?.search;
     if (kw) {
+      setCurrentPage(1);
       setSearchQuery(kw);
       window.history.replaceState({}, '');
     }
@@ -115,7 +125,13 @@ export const AdminBooksPage: React.FC = () => {
         showToast('Thêm sách mới thành công', 'success');
       }
       setIsModalOpen(false);
-      fetchBooks();
+      if (!editingBook) {
+        // Sách mới nhất hiện đầu danh sách -> về trang 1 để thấy ngay
+        if (currentPage !== 1) setCurrentPage(1);
+        else fetchBooks(1);
+      } else {
+        fetchBooks();
+      }
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Lỗi thao tác sách', 'error');
     }
@@ -126,7 +142,12 @@ export const AdminBooksPage: React.FC = () => {
     try {
       const res = await api.delete(`/books/${id}`);
       showToast(res.data.message || 'Xóa sách thành công', 'info');
-      fetchBooks();
+      // Nếu xóa cuốn cuối cùng của trang (trừ trang 1) thì lùi về trang trước
+      if (books.length === 1 && currentPage > 1) {
+        setCurrentPage((p) => p - 1);
+      } else {
+        fetchBooks();
+      }
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Lỗi xóa sách', 'error');
     }
@@ -156,7 +177,10 @@ export const AdminBooksPage: React.FC = () => {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setCurrentPage(1);
+              setSearchQuery(e.target.value);
+            }}
             placeholder="Tìm theo tên sách, tác giả..."
             className="w-full text-xs p-3 pl-10 rounded-xl bg-gray-50 border border-transparent focus:border-kimdong-red outline-none"
           />
@@ -178,7 +202,16 @@ export const AdminBooksPage: React.FC = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {books.map((book) => (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-gray-400">Đang tải danh sách sách...</td>
+                </tr>
+              ) : books.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-8 text-center text-gray-400">Không tìm thấy sách phù hợp</td>
+                </tr>
+              ) : (
+                books.map((book) => (
                 <tr key={book.id} className="hover:bg-gray-50/50">
                   <td className="py-3 px-4 flex items-center gap-3">
                     <img src={book.cover_image} alt="" className="w-10 h-12 object-contain rounded bg-gray-50 border p-0.5" />
@@ -211,10 +244,48 @@ export const AdminBooksPage: React.FC = () => {
                     </button>
                   </td>
                 </tr>
-              ))}
+                ))
+              )}
             </tbody>
           </table>
         </div>
+        {/* Pagination: 10 sách / trang */}
+        {pagination.totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+            <p className="text-[11px] text-gray-500">
+              Hiển thị <span className="font-bold text-gray-800">{books.length}</span> / <span className="font-bold text-gray-800">{pagination.total}</span> sách — Trang <span className="font-bold text-kimdong-red">{pagination.page}</span> / {pagination.totalPages}
+            </p>
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={currentPage <= 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ‹ Trước
+              </button>
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setCurrentPage(p)}
+                  className={`w-8 h-8 rounded-lg text-[11px] font-bold transition-colors ${
+                    currentPage === p
+                      ? 'bg-kimdong-red text-white shadow'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                disabled={currentPage >= pagination.totalPages}
+                onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Sau ›
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Book Form Modal */}

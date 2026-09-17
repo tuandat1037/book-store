@@ -86,10 +86,16 @@ export const BookCard: React.FC<BookCardProps> = ({ book }) => {
             <div className="flex items-center text-amber-400">
               <Star className="w-3 h-3 fill-amber-400" />
             </div>
-            <span className="text-[11px] font-bold text-gray-700">
-              {book.rating_avg ? Number(book.rating_avg).toFixed(1) : '5.0'}
-            </span>
-            <span className="text-[10px] text-gray-400">({book.review_count || 12})</span>
+            {Number(book.review_count || 0) > 0 && book.rating_avg != null ? (
+              <>
+                <span className="text-[11px] font-bold text-gray-700">
+                  {Number(book.rating_avg).toFixed(1)}
+                </span>
+                <span className="text-[10px] text-gray-400">({Number(book.review_count)})</span>
+              </>
+            ) : (
+              <span className="text-[10px] text-gray-400 italic">Chưa có đánh giá</span>
+            )}
           </div>
         </div>
 
