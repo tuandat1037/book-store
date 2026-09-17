@@ -122,7 +122,9 @@ export async function getBookBySlugOrId(req: Request, res: Response) {
 
     const related = await query(`
       SELECT b.id, b.title, b.slug, b.price, b.sale_price,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC, id ASC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC, id ASC LIMIT 1) as cover_image,
+              (SELECT AVG(rating) FROM reviews WHERE book_id = b.id AND status = 'APPROVED') as rating_avg,
+              (SELECT COUNT(*) FROM reviews WHERE book_id = b.id AND status = 'APPROVED') as review_count
       FROM books b
       WHERE b.category_id = ? AND b.id != ? AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
       LIMIT 6
@@ -140,9 +142,13 @@ export async function getBookBySlugOrId(req: Request, res: Response) {
 
 export async function getHomeSections(req: Request, res: Response) {
   try {
+    const ratingSelect = `
+             (SELECT AVG(rating) FROM reviews WHERE book_id = b.id AND status = 'APPROVED') as rating_avg,
+             (SELECT COUNT(*) FROM reviews WHERE book_id = b.id AND status = 'APPROVED') as review_count`;
     const featured = await query(`
       SELECT b.*, a.name as author_name,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image,
+              ${ratingSelect}
       FROM books b
       LEFT JOIN authors a ON b.author_id = a.id
       WHERE b.is_featured = 1 AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
@@ -151,7 +157,8 @@ export async function getHomeSections(req: Request, res: Response) {
 
     const newArrivals = await query(`
       SELECT b.*, a.name as author_name,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image,
+              ${ratingSelect}
       FROM books b
       LEFT JOIN authors a ON b.author_id = a.id
       WHERE b.is_new = 1 AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
@@ -160,7 +167,8 @@ export async function getHomeSections(req: Request, res: Response) {
 
     const bestsellers = await query(`
       SELECT b.*, a.name as author_name,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image,
+              ${ratingSelect}
       FROM books b
       LEFT JOIN authors a ON b.author_id = a.id
       WHERE b.is_bestseller = 1 AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
@@ -169,7 +177,8 @@ export async function getHomeSections(req: Request, res: Response) {
 
     const promotions = await query(`
       SELECT b.*, a.name as author_name,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image,
+              ${ratingSelect}
       FROM books b
       LEFT JOIN authors a ON b.author_id = a.id
       WHERE b.sale_price IS NOT NULL AND b.sale_price < b.price AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
@@ -179,7 +188,8 @@ export async function getHomeSections(req: Request, res: Response) {
     // Category Specific Collections for Homepage Sections
     const doraemonBooks = await query(`
       SELECT b.*, a.name as author_name,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image,
+              ${ratingSelect}
       FROM books b
       LEFT JOIN authors a ON b.author_id = a.id
       WHERE b.category_id = 6 AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
@@ -188,7 +198,8 @@ export async function getHomeSections(req: Request, res: Response) {
 
     const conanBooks = await query(`
       SELECT b.*, a.name as author_name,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image,
+              ${ratingSelect}
       FROM books b
       LEFT JOIN authors a ON b.author_id = a.id
       WHERE b.category_id = 7 AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
@@ -197,7 +208,8 @@ export async function getHomeSections(req: Request, res: Response) {
 
     const onePieceBooks = await query(`
       SELECT b.*, a.name as author_name,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image,
+              ${ratingSelect}
       FROM books b
       LEFT JOIN authors a ON b.author_id = a.id
       WHERE b.category_id = 8 AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
@@ -206,7 +218,8 @@ export async function getHomeSections(req: Request, res: Response) {
 
     const thieuNhiBooks = await query(`
       SELECT b.*, a.name as author_name,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image,
+              ${ratingSelect}
       FROM books b
       LEFT JOIN authors a ON b.author_id = a.id
       WHERE (b.category_id = 2 OR b.category_id = 10 OR b.category_id = 11) AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
@@ -215,7 +228,8 @@ export async function getHomeSections(req: Request, res: Response) {
 
     const vanHocVnBooks = await query(`
       SELECT b.*, a.name as author_name,
-             (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image
+              (SELECT image_url FROM book_images WHERE book_id = b.id ORDER BY is_primary DESC LIMIT 1) as cover_image,
+              ${ratingSelect}
       FROM books b
       LEFT JOIN authors a ON b.author_id = a.id
       WHERE (b.category_id = 12 OR b.category_id = 3) AND b.status = 'ACTIVE' AND b.deleted_at IS NULL
