@@ -65,6 +65,9 @@ export const AdminDashboardPage: React.FC = () => {
   });
 
   const [loading, setLoading] = useState(true);
+  // Phân trang bảng Cảnh Báo Tồn Kho: 10 sách / trang để không kéo dài web
+  const [lowStockPage, setLowStockPage] = useState(1);
+  const LOW_STOCK_PAGE_SIZE = 10;
 
   const fetchStats = () => {
     setLoading(true);
@@ -92,6 +95,14 @@ export const AdminDashboardPage: React.FC = () => {
 
   const { summary, recentOrders, topSellingBooks, booksByCategory, ordersChart, revenueSummary, revenueByCategory, lowStock } = stats;
   const alertCount = (lowStock?.outOfStockCount || 0) + (lowStock?.lowStockCount || 0);
+
+  // Cắt danh sách cảnh báo theo trang (kẹp trang hợp lệ khi dữ liệu đổi sau refresh)
+  const lowStockTotalPages = Math.max(1, Math.ceil((lowStock?.books?.length || 0) / LOW_STOCK_PAGE_SIZE));
+  const safeLowStockPage = Math.min(Math.max(1, lowStockPage), lowStockTotalPages);
+  const lowStockPageBooks = (lowStock?.books || []).slice(
+    (safeLowStockPage - 1) * LOW_STOCK_PAGE_SIZE,
+    safeLowStockPage * LOW_STOCK_PAGE_SIZE
+  );
 
   /**
    * Tăng trưởng so với tháng trước, tính từ dữ liệu thật.
@@ -221,7 +232,7 @@ export const AdminDashboardPage: React.FC = () => {
               <span>Quản lý kho</span>
             </button>
             <button
-              onClick={fetchStats}
+              onClick={() => { setLowStockPage(1); fetchStats(); }}
               title="Tải lại cảnh báo tồn kho"
               className="p-2 text-gray-500 border border-gray-200 hover:border-kimdong-red hover:text-kimdong-red hover:bg-red-50 rounded-lg transition-colors"
             >
@@ -249,7 +260,7 @@ export const AdminDashboardPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {lowStock.books.map((book) => {
+                {lowStockPageBooks.map((book) => {
                   const isOut = Number(book.stock) === 0;
                   return (
                     <tr key={book.id} className={isOut ? 'bg-red-50/40' : 'hover:bg-gray-50/60'}>
@@ -288,6 +299,43 @@ export const AdminDashboardPage: React.FC = () => {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+        {/* Pagination: 10 sách / trang */}
+        {alertCount > 0 && lowStockTotalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+            <p className="text-[11px] text-gray-500">
+              Hiển thị <span className="font-bold text-gray-800">{lowStockPageBooks.length}</span> / <span className="font-bold text-gray-800">{lowStock.books.length}</span> sách — Trang <span className="font-bold text-kimdong-red">{safeLowStockPage}</span> / {lowStockTotalPages}
+            </p>
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={safeLowStockPage <= 1}
+                onClick={() => setLowStockPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ‹ Trước
+              </button>
+              {Array.from({ length: lowStockTotalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setLowStockPage(p)}
+                  className={`w-8 h-8 rounded-lg text-[11px] font-bold transition-colors ${
+                    safeLowStockPage === p
+                      ? 'bg-kimdong-red text-white shadow'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                disabled={safeLowStockPage >= lowStockTotalPages}
+                onClick={() => setLowStockPage((p) => Math.min(lowStockTotalPages, p + 1))}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Sau ›
+              </button>
+            </div>
           </div>
         )}
       </div>

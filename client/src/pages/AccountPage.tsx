@@ -10,7 +10,7 @@ import { Order, ReviewableBook } from '../types';
 import { formatVND, formatDate } from '../utils/format';
 
 export const AccountPage: React.FC = () => {
-  const { user, updateUser, logout } = useAuth();
+  const { user, updateUser, requestLogout } = useAuth();
   const { showToast } = useToast();
   const [activeTab, setActiveTab] = useState<'profile' | 'orders'>('orders');
 
@@ -169,7 +169,7 @@ export const AccountPage: React.FC = () => {
         </div>
 
         <button
-          onClick={logout}
+          onClick={requestLogout}
           className="text-xs font-bold text-red-600 hover:bg-red-50 px-4 py-2 rounded-xl transition-colors flex items-center gap-1.5"
         >
           <LogOut className="w-4 h-4" />

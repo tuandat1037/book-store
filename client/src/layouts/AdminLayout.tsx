@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { SiteLogo } from '../components/common/SiteLogo';
 
 export const AdminLayout: React.FC = () => {
-  const { user, logout, loading } = useAuth();
+  const { user, requestLogout, loading } = useAuth();
   const location = useLocation();
 
   if (loading) return null;
@@ -106,7 +106,7 @@ export const AdminLayout: React.FC = () => {
             </Link>
 
             <button
-              onClick={logout}
+              onClick={requestLogout}
               className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-kimdong-red hover:bg-kimdong-darkred text-white text-xs font-bold shadow-sm hover:shadow transition-all active:scale-95"
             >
               <LogOut className="w-4 h-4" />

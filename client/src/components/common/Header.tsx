@@ -21,7 +21,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
   const searchRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const { user, logout } = useAuth();
+  const { user, requestLogout } = useAuth();
   const { cartCount, subtotal } = useCart();
   const { wishlistIds } = useWishlist();
 
@@ -223,7 +223,7 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
                       <button
                         onClick={() => {
                           setUserMenuOpen(false);
-                          logout();
+                          requestLogout();
                         }}
                         className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors border-t border-gray-100 mt-1"
                       >

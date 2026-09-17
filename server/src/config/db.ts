@@ -84,6 +84,14 @@ export async function queryOne<T = any>(sql: string, params: any[] = []): Promis
   return rows.length > 0 ? rows[0] : null;
 }
 
+/** Đóng pool sau khi test xong để Vitest không bị treo. */
+export async function closeDatabase() {
+  if (mysqlPool) {
+    await mysqlPool.end();
+    mysqlPool = null;
+  }
+}
+
 /**
  * In hướng dẫn xử lý khi không kết nối được MySQL.
  * Gọi từ index.ts để thông báo lỗi dễ hiểu thay vì chỉ hiện stack trace.
