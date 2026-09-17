@@ -74,6 +74,9 @@ export const AdminInventoryPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  // Phân trang bảng tồn kho: 10 sách / trang để không kéo dài web
+  const [invPage, setInvPage] = useState(1);
+  const INV_PAGE_SIZE = 10;
   const { showToast } = useToast();
 
   // Chi tiết kho
@@ -120,6 +123,11 @@ export const AdminInventoryPage: React.FC = () => {
     const t = setTimeout(() => fetchInventory(), 350);
     return () => clearTimeout(t);
   }, [keyword]);
+
+  // Đổi bộ lọc / từ khóa / dữ liệu mới -> về trang 1 để không kẹt ở trang trống
+  useEffect(() => {
+    setInvPage(1);
+  }, [statusFilter, keyword]);
 
   const handleOpenDetail = async (book: InventoryBook) => {
     setDetailLoading(true);
@@ -209,6 +217,11 @@ export const AdminInventoryPage: React.FC = () => {
     const st = statusOf(b);
     return st === 'OUT_OF_STOCK' || st === 'LOW_STOCK';
   };
+
+  // Cắt danh sách kho theo trang (kẹp trang hợp lệ khi dữ liệu đổi)
+  const invTotalPages = Math.max(1, Math.ceil(books.length / INV_PAGE_SIZE));
+  const safeInvPage = Math.min(Math.max(1, invPage), invTotalPages);
+  const pageBooks = books.slice((safeInvPage - 1) * INV_PAGE_SIZE, safeInvPage * INV_PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -355,7 +368,7 @@ export const AdminInventoryPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {books.map((b) => {
+                {pageBooks.map((b) => {
                   const st = statusOf(b);
                   const meta = STATUS_META[st];
                   return (
@@ -427,6 +440,43 @@ export const AdminInventoryPage: React.FC = () => {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+        {/* Pagination: 10 sách / trang */}
+        {!loading && invTotalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+            <p className="text-[11px] text-gray-500">
+              Hiển thị <span className="font-bold text-gray-800">{pageBooks.length}</span> / <span className="font-bold text-gray-800">{books.length}</span> sách — Trang <span className="font-bold text-kimdong-red">{safeInvPage}</span> / {invTotalPages}
+            </p>
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={safeInvPage <= 1}
+                onClick={() => setInvPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ‹ Trước
+              </button>
+              {Array.from({ length: invTotalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setInvPage(p)}
+                  className={`w-8 h-8 rounded-lg text-[11px] font-bold transition-colors ${
+                    safeInvPage === p
+                      ? 'bg-kimdong-red text-white shadow'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                disabled={safeInvPage >= invTotalPages}
+                onClick={() => setInvPage((p) => Math.min(invTotalPages, p + 1))}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Sau ›
+              </button>
+            </div>
           </div>
         )}
       </div>

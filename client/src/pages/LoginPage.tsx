@@ -25,7 +25,7 @@ export const LoginPage: React.FC = () => {
       if (res.data.user.role === 'ADMIN' || res.data.user.role === 'EMPLOYEE') {
         navigate('/admin');
       } else {
-        navigate('/account');
+        navigate('/');
       }
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Đăng nhập không thành công', 'error');
