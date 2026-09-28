@@ -344,6 +344,20 @@ export async function cancelOrder(req: AuthRequest, res: Response) {
     const order = await queryOne('SELECT * FROM orders WHERE id = ? OR order_code = ?', [id, id]);
     if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
 
+    // Khách hàng chỉ được hủy ĐƠN CỦA MÌNH và khi đơn còn ở trạng thái
+    // chờ xác nhận / đã xác nhận (chưa đóng gói, chưa giao).
+    // Đơn vãng lai (user_id null) thì khách phải liên hệ shop để hủy.
+    if (req.user?.role_name === 'CUSTOMER') {
+      if (!order.user_id || Number(order.user_id) !== Number(req.user.id)) {
+        return res.status(403).json({ message: 'Bạn chỉ được hủy đơn hàng của chính mình' });
+      }
+      if (!['PENDING', 'CONFIRMED'].includes(order.order_status)) {
+        return res.status(400).json({
+          message: `Đơn hàng đang ở trạng thái "${translateStatus(order.order_status)}" nên bạn không thể tự hủy. Vui lòng liên hệ cửa hàng để được hỗ trợ.`
+        });
+      }
+    }
+
     // Đã hủy rồi thì không hoàn kho lần nữa
     if (order.order_status === 'CANCELLED') {
       return res.status(400).json({

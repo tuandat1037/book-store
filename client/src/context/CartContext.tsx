@@ -1,14 +1,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { CartItem } from '../types';
 import { useToast } from './ToastContext';
+import { useAuth } from './AuthContext';
 
 interface CartContextType {
   items: CartItem[];
   cartCount: number;
   subtotal: number;
   loading: boolean;
-  addToCart: (bookId: number, quantity?: number) => Promise<void>;
+  addToCart: (bookId: number, quantity?: number) => Promise<boolean>;
   updateQuantity: (cartItemId: number, quantity: number) => Promise<void>;
   removeItem: (cartItemId: number) => Promise<void>;
   removeItems: (cartItemIds: number[]) => Promise<void>;
@@ -22,8 +24,25 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [items, setItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const { showToast } = useToast();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  /** Chưa đăng nhập thì không gọi API giỏ hàng (server đã chặn 401). */
+  const requireLogin = () => {
+    if (!user) {
+      showToast('Vui lòng đăng nhập để sử dụng giỏ hàng', 'info');
+      navigate('/login');
+      return false;
+    }
+    return true;
+  };
 
   const fetchCart = async () => {
+    if (!user) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
       const res = await api.get('/cart');
@@ -37,15 +56,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [user?.id]);
 
   const addToCart = async (bookId: number, quantity: number = 1) => {
+    if (!requireLogin()) return false;
     try {
       await api.post('/cart/items', { book_id: bookId, quantity });
       showToast('Đã thêm sản phẩm vào giỏ hàng!', 'success');
       await fetchCart();
+      return true;
     } catch (error: any) {
       showToast(error.response?.data?.message || 'Không thể thêm vào giỏ hàng', 'error');
+      return false;
     }
   };
 

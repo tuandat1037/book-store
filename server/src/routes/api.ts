@@ -74,13 +74,13 @@ router.get('/customers', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), 
 router.get('/customers/:id', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), customerCtrl.getCustomerDetail);
 router.put('/customers/:id', authenticateToken, requireRole(['ADMIN']), customerCtrl.updateCustomer);
 
-// Cart Routes
-router.get('/cart', optionalAuth, cartCtrl.getCart);
-router.post('/cart/items', optionalAuth, cartCtrl.addToCart);
-router.put('/cart/items/:id', optionalAuth, cartCtrl.updateCartItem);
-router.delete('/cart/items/:id', optionalAuth, cartCtrl.removeCartItem);
-router.post('/cart/items/remove', optionalAuth, cartCtrl.removeCartItems);
-router.delete('/cart/clear', optionalAuth, cartCtrl.clearCart);
+// Cart Routes (bắt buộc đăng nhập mới được xem/thêm giỏ hàng)
+router.get('/cart', authenticateToken, cartCtrl.getCart);
+router.post('/cart/items', authenticateToken, cartCtrl.addToCart);
+router.put('/cart/items/:id', authenticateToken, cartCtrl.updateCartItem);
+router.delete('/cart/items/:id', authenticateToken, cartCtrl.removeCartItem);
+router.post('/cart/items/remove', authenticateToken, cartCtrl.removeCartItems);
+router.delete('/cart/clear', authenticateToken, cartCtrl.clearCart);
 
 // Order Routes
 router.post('/orders', optionalAuth, orderCtrl.createOrder);
@@ -89,7 +89,9 @@ router.get('/orders/:id', optionalAuth, orderCtrl.getOrderById);
 // Kiểm tra thông tin đơn + xác nhận đơn hàng (nhân viên / quản trị)
 router.get('/orders/:id/verification', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), orderCtrl.getOrderVerification);
 router.put('/orders/:id/confirm', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), orderCtrl.confirmOrder);
-router.put('/orders/:id/cancel', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), orderCtrl.cancelOrder);
+// Khách hàng được tự hủy ĐƠN CỦA MÌNH (kiểm tra chính chủ trong controller),
+// nhân viên / quản trị hủy đơn bất kỳ.
+router.put('/orders/:id/cancel', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE', 'CUSTOMER']), orderCtrl.cancelOrder);
 router.put('/orders/:id/status', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), orderCtrl.updateOrderStatus);
 
 // Admin Routes

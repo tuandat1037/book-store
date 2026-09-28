@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:unit": "vitest run src/__tests__/format.unit.test.ts"
   },
   "dependencies": {
     "axios": "^1.6.8",

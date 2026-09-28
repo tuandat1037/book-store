@@ -8,6 +8,7 @@ import { initDatabase, closeDatabase, queryOne, query } from '../config/db.js';
  * Luồng: tạo đơn -> check trừ kho -> confirm -> confirm lại -> cancel hoàn kho
  */
 let adminToken = '';
+let customerToken = '';
 let stockBefore = 0;
 let orderId = 0;
 const createdOrderIds: number[] = [];
@@ -28,18 +29,21 @@ beforeAll(async () => {
   await initDatabase();
   const a = await request(app).post('/api/auth/login').send({ email: 'admin@kimdong.vn', password: 'admin123' });
   adminToken = a.body.token;
+  const c = await request(app).post('/api/auth/login').send({ email: 'khachhang@gmail.com', password: 'user123' });
+  customerToken = c.body.token;
   const b = await queryOne('SELECT stock FROM books WHERE id = ?', [BOOK_ID]);
   stockBefore = Number((b as any)?.stock ?? 0);
 }, 30000);
 
 afterAll(async () => {
   // Dọn đơn tạo trong test để không làm lệch tồn kho/seed:
-  // đơn CANCELLED đã hoàn kho -> xóa thẳng; đơn DELIVERED -> cộng lại kho rồi xóa.
+  // đơn chưa hủy (PENDING/SHIPPING/DELIVERED) -> cộng lại kho rồi xóa;
+  // đơn CANCELLED đã hoàn kho -> xóa thẳng.
   try {
     for (const id of createdOrderIds) {
       const items: any[] = await query('SELECT book_id, quantity FROM order_items WHERE order_id = ?', [id]);
       const ord: any = await queryOne('SELECT order_status FROM orders WHERE id = ?', [id]);
-      if (ord?.order_status === 'DELIVERED') {
+      if (ord && ord.order_status !== 'CANCELLED') {
         for (const it of items) {
           await query('UPDATE books SET stock = stock + ? WHERE id = ?', [Number(it.quantity), it.book_id]);
         }
@@ -133,5 +137,55 @@ describe('Đặt hàng POST /api/orders', () => {
       .send({ reason: 'Muốn hủy đơn đã giao' });
     expect(cancel.status).toBe(400);
     // dọn: đơn DELIVERED giữ nguyên (không hoàn kho) — đúng nghiệp vụ
+  });
+});
+
+describe('Khách hàng tự hủy đơn của mình', () => {
+  it('TC-ORD-08: CUSTOMER hủy đơn PENDING của mình -> 200 + hoàn kho', async () => {
+    const created = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({ ...SHIP, items: [{ book_id: BOOK_ID, quantity: 1 }] });
+    expect(created.status).toBe(201);
+    const id = Number(created.body.orderId);
+    createdOrderIds.push(id);
+
+    const cancel = await request(app)
+      .put(`/api/orders/${id}/cancel`)
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({ reason: 'Tôi đặt nhầm sách, muốn hủy' });
+    expect(cancel.status).toBe(200);
+    expect(cancel.body.order_status).toBe('CANCELLED');
+  });
+
+  it('TC-ORD-09: CUSTOMER hủy đơn KHÔNG phải của mình -> 403', async () => {
+    // Đơn vãng lai (không token -> user_id null) không thuộc về customer
+    const guest = await request(app)
+      .post('/api/orders')
+      .send({ ...SHIP, items: [{ book_id: BOOK_ID, quantity: 1 }] });
+    const id = Number(guest.body.orderId);
+    createdOrderIds.push(id);
+
+    const cancel = await request(app)
+      .put(`/api/orders/${id}/cancel`)
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({ reason: 'Cố hủy đơn của người khác' });
+    expect(cancel.status).toBe(403);
+  });
+
+  it('TC-ORD-10: CUSTOMER không tự hủy được đơn đang SHIPPING -> 400', async () => {
+    const created = await request(app)
+      .post('/api/orders')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({ ...SHIP, items: [{ book_id: BOOK_ID, quantity: 1 }] });
+    const id = Number(created.body.orderId);
+    createdOrderIds.push(id);
+    await request(app).put(`/api/orders/${id}/status`).set('Authorization', `Bearer ${adminToken}`).send({ order_status: 'SHIPPING' });
+
+    const cancel = await request(app)
+      .put(`/api/orders/${id}/cancel`)
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({ reason: 'Muốn hủy đơn đang giao' });
+    expect(cancel.status).toBe(400);
   });
 });

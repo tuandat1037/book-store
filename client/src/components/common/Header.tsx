@@ -154,9 +154,9 @@ export const Header: React.FC<HeaderProps> = ({ onToggleMobileMenu }) => {
               )}
             </Link>
 
-            {/* Cart Icon */}
+            {/* Cart Icon (bắt buộc đăng nhập mới xem được giỏ) */}
             <Link
-              to="/cart"
+              to={user ? '/cart' : '/login'}
               className="relative flex items-center gap-2.5 p-2 text-gray-700 hover:text-kimdong-red hover:bg-gray-100 rounded-lg transition-all group"
               title="Giỏ hàng của bạn"
             >

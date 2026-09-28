@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Trash2, ArrowRight, Tag, ArrowLeft, X, AlertTriangle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { formatVND } from '../utils/format';
 import { useToast } from '../context/ToastContext';
 import { Modal } from '../components/common/Modal';
@@ -20,6 +21,12 @@ export const CartPage: React.FC = () => {
   const [deleting, setDeleting] = useState(false);
   const { showToast } = useToast();
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+
+  // Chưa đăng nhập thì đá về trang đăng nhập (giỏ hàng bắt buộc đăng nhập)
+  if (!authLoading && !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   // Bỏ chọn những sách đã bị xóa khỏi giỏ (tránh id treo)
   useEffect(() => {
