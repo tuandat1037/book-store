@@ -278,7 +278,7 @@ CREATE TABLE `orders` (
 --
 
 INSERT INTO `orders` (`id`, `order_code`, `user_id`, `customer_name`, `customer_email`, `customer_phone`, `shipping_address`, `shipping_province`, `shipping_district`, `shipping_ward`, `notes`, `subtotal`, `discount_amount`, `shipping_fee`, `total_amount`, `payment_method`, `payment_status`, `order_status`, `cancel_reason`, `cancelled_at`, `created_at`, `updated_at`) VALUES
-(1, 'DH202609001', 3, 'Nguyễn Văn An', 'khachhang@gmail.com', '0987654321', '123 Nguyễn Trãi', 'TP. Hồ Chí Minh', 'Quận 1', 'Bến Thành', NULL, 120000.00, 20000.00, 20000.00, 120000.00, 'COD', 'UNPAID', 'DELIVERED', NULL, NULL, '2026-09-10 03:15:00', '2026-09-15 03:36:45'),
+(1, 'DH202609001', 3, 'Nguyễn Văn An', 'khachhang@gmail.com', '0987654321', '123 Nguyễn Trãi', 'TP. Hồ Chí Minh', 'Quận 1', 'Bến Thành', NULL, 120000.00, 20000.00, 20000.00, 120000.00, 'COD', 'PAID', 'DELIVERED', NULL, NULL, '2026-09-10 03:15:00', '2026-09-15 03:36:45'),
 (2, 'DH202609002', 3, 'Nguyễn Văn An', 'khachhang@gmail.com', '0987654321', '123 Nguyễn Trãi', 'TP. Hồ Chí Minh', 'Quận 1', 'Bến Thành', NULL, 148000.00, 0.00, 20000.00, 168000.00, 'BANKING', 'PAID', 'SHIPPING', NULL, NULL, '2026-09-14 07:30:00', '2026-09-15 18:46:35');
 
 -- --------------------------------------------------------
