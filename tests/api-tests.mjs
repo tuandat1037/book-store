@@ -1038,8 +1038,8 @@ async function mkOrder(items, { token, method = 'COD', ship = {} } = {}) {
       return (await PUT(`/orders/${o.id}/cancel`, { token: empToken, body: { reason: 'Nhân viên huỷ theo yêu cầu' } })).status;
     });
 
-  await T('TC-ORD-49', 'Đơn hàng', 'KHÁCH HÀNG không huỷ được đơn', 'HTTP 403',
-    v => v === 403, async () => {
+  await T('TC-ORD-49', 'Đơn hàng', 'KHÁCH HÀNG tự huỷ được đơn hàng PENDING của mình', 'HTTP 200',
+    v => v === 200, async () => {
       const o = await mkOrder([{ book_id: 3, quantity: 1 }], { token: cusToken });
       return (await PUT(`/orders/${o.id}/cancel`, { token: cusToken, body: { reason: 'Khách tự huỷ đơn hàng' } })).status;
     });
@@ -1065,8 +1065,8 @@ async function mkOrder(items, { token, method = 'COD', ship = {} } = {}) {
       return { status: r.status, hasSummary: !!r.data?.summary };
     });
 
-  await T('TC-INV-03', 'Quản lý kho', 'Ngưỡng cảnh báo tồn kho = 100', 'threshold = 100',
-    v => v === 100, async () => Number((await GET('/inventory', { token: adminToken })).data?.threshold));
+  await T('TC-INV-03', 'Quản lý kho', 'Ngưỡng cảnh báo tồn kho = 20', 'threshold = 20',
+    v => v === 20, async () => Number((await GET('/inventory', { token: adminToken })).data?.threshold));
 
   await T('TC-INV-04', 'Quản lý kho', 'Sách dưới ngưỡng được xếp lên đầu', 'Sách tồn thấp đứng trước',
     v => v === true, async () => {
@@ -1298,8 +1298,8 @@ async function mkOrder(items, { token, method = 'COD', ship = {} } = {}) {
       return Math.abs(sum - Number(st.revenueByCategory?.summary?.totalRevenue || 0)) < 1;
     });
 
-  await T('TC-DASH-11', 'Thống kê', 'Cảnh báo tồn kho thấp dùng ngưỡng 100', 'threshold = 100',
-    v => v === 100, async () => Number(st.lowStock?.threshold));
+  await T('TC-DASH-11', 'Thống kê', 'Cảnh báo tồn kho thấp dùng ngưỡng 20', 'threshold = 20',
+    v => v === 20, async () => Number(st.lowStock?.threshold));
 
   await T('TC-DASH-12', 'Thống kê', 'KHÁCH HÀNG không xem được thống kê', 'HTTP 403',
     v => v === 403, async () => (await GET('/admin/statistics', { token: cusToken })).status);

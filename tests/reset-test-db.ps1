@@ -27,17 +27,30 @@
 #>
 param(
     [string]$DbName   = 'kimdong_bookstore_test',
-    [string]$MysqlBin = 'D:\xampp\mysql\bin\mysql.exe'
+    [string]$MysqlBin = ''
 )
 
 $ErrorActionPreference = 'Stop'
 
+# Tự động tìm mysql.exe nếu không truyền vào
+if (-not $MysqlBin) {
+    $candidates = @(
+        'C:\xampp\mysql\bin\mysql.exe',
+        'D:\xampp\mysql\bin\mysql.exe',
+        'E:\xampp\mysql\bin\mysql.exe',
+        'C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe'
+    )
+    foreach ($c in $candidates) {
+        if (Test-Path $c) { $MysqlBin = $c; break }
+    }
+    if (-not $MysqlBin) {
+        $cmd = Get-Command mysql.exe -ErrorAction SilentlyContinue
+        if ($cmd) { $MysqlBin = $cmd.Source }
+    }
+}
+
 # Thư mục gốc dự án (script nằm trong tests/)
 $Root = Resolve-Path (Join-Path $PSScriptRoot '..')
-
-if (-not (Test-Path $MysqlBin)) {
-    throw "Khong tim thay mysql.exe tai: $MysqlBin`nHay truyen tham so -MysqlBin duong/dan/mysql.exe"
-}
 
 $schemaPath = Join-Path $Root 'database\schema.sql'
 $seedPath   = Join-Path $Root 'database\seed.sql'

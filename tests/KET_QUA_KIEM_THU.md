@@ -2,7 +2,7 @@
 
 **Dự án:** Website Bán Sách Trực Tuyến — NXB Kim Đồng  
 **Địa chỉ API:** `http://localhost:5099/api`  
-**Thời điểm chạy:** 23:00:26 16/9/2026  
+**Thời điểm chạy:** 17:59:48 1/10/2026  
 **Công cụ:** Bộ kiểm thử tự động `tests/api-tests.mjs`
 
 ---
@@ -165,7 +165,7 @@
 | TC-CART-14 | Giỏ hàng | Xoá nhiều sản phẩm cùng lúc | HTTP 200 | 200 | ✅ Đạt |
 | TC-CART-16 | Giỏ hàng | Xoá nhiều sản phẩm với danh sách rỗng | HTTP 400 | 400 | ✅ Đạt |
 | TC-CART-15 | Giỏ hàng | Giỏ tách riêng theo người dùng | Giỏ khách khác không bị ảnh hưởng | true | ✅ Đạt |
-| TC-ORD-01 | Đơn hàng | Đặt hàng thành công | HTTP 201 + có mã đơn | {"status":201,"code":"DH7442580315"} | ✅ Đạt |
+| TC-ORD-01 | Đơn hàng | Đặt hàng thành công | HTTP 201 + có mã đơn | {"status":201,"code":"DH5238643530"} | ✅ Đạt |
 | TC-ORD-02 | Đơn hàng | Tồn kho bị trừ NGAY khi đặt hàng | Sách 3 giảm 5 cuốn (80 → 75) | 75 | ✅ Đạt |
 | TC-ORD-03 | Đơn hàng | Đơn mới ở trạng thái CHỜ XÁC NHẬN | PENDING | PENDING | ✅ Đạt |
 | TC-ORD-04 | Đơn hàng | Xem danh sách đơn hàng | HTTP 200 + có dữ liệu | {"status":200,"count":3} | ✅ Đạt |
@@ -186,7 +186,7 @@
 | TC-ORD-18 | Đơn hàng | Huỷ đơn ở trạng thái ĐANG GIAO | HTTP 200 | 200 | ✅ Đạt |
 | TC-ORD-19 | Đơn hàng | Đơn chuyển sang ĐÃ HUỶ | CANCELLED | CANCELLED | ✅ Đạt |
 | TC-ORD-20 | Đơn hàng | Lý do huỷ được lưu lại | Đúng lý do đã nhập | Khách hàng yêu cầu hủy đơn | ✅ Đạt |
-| TC-ORD-21 | Đơn hàng | Thời điểm huỷ được ghi nhận | Có cancelled_at | 2026-09-16T16:00:25.000Z | ✅ Đạt |
+| TC-ORD-21 | Đơn hàng | Thời điểm huỷ được ghi nhận | Có cancelled_at | 2026-10-01T10:59:46.000Z | ✅ Đạt |
 | TC-ORD-22 | Đơn hàng | HOÀN LẠI tồn kho sách 3 (5 cuốn) | Sách 3 về 80 | 80 | ✅ Đạt |
 | TC-ORD-23 | Đơn hàng | HOÀN LẠI tồn kho sách 7 (3 cuốn) | Sách 7 về 180 | 180 | ✅ Đạt |
 | TC-ORD-24 | Đơn hàng | Huỷ đơn lần thứ hai bị từ chối | HTTP 400 | 400 | ✅ Đạt |
@@ -214,11 +214,11 @@
 | TC-ORD-46 | Đơn hàng | Đơn thanh toán chuyển khoản được đánh dấu ĐÃ THANH TOÁN | PAID | PAID | ✅ Đạt |
 | TC-ORD-47 | Đơn hàng | Huỷ đơn đã thanh toán thì đánh dấu cần hoàn tiền | REFUNDED | REFUNDED | ✅ Đạt |
 | TC-ORD-48 | Đơn hàng | NHÂN VIÊN huỷ được đơn hàng | HTTP 200 | 200 | ✅ Đạt |
-| TC-ORD-49 | Đơn hàng | KHÁCH HÀNG không huỷ được đơn | HTTP 403 | 403 | ✅ Đạt |
+| TC-ORD-49 | Đơn hàng | KHÁCH HÀNG tự huỷ được đơn hàng PENDING của mình | HTTP 200 | 200 | ✅ Đạt |
 | TC-ORD-50 | Đơn hàng | Không đăng nhập không huỷ được đơn | HTTP 401 | 401 | ✅ Đạt |
 | TC-INV-01 | Quản lý kho | Lấy danh sách tồn kho | HTTP 200 + có dữ liệu | {"status":200,"count":12} | ✅ Đạt |
 | TC-INV-02 | Quản lý kho | Có thống kê tổng hợp tồn kho | Có summary | {"status":200,"hasSummary":true} | ✅ Đạt |
-| TC-INV-03 | Quản lý kho | Ngưỡng cảnh báo tồn kho = 100 | threshold = 100 | 100 | ✅ Đạt |
+| TC-INV-03 | Quản lý kho | Ngưỡng cảnh báo tồn kho = 20 | threshold = 20 | 20 | ✅ Đạt |
 | TC-INV-04 | Quản lý kho | Sách dưới ngưỡng được xếp lên đầu | Sách tồn thấp đứng trước | true | ✅ Đạt |
 | TC-INV-05 | Quản lý kho | Lọc kho theo trạng thái hết hàng | HTTP 200 | 200 | ✅ Đạt |
 | TC-INV-06 | Quản lý kho | Tồn kho theo danh mục | HTTP 200 + có dữ liệu | {"status":200,"count":6} | ✅ Đạt |
@@ -267,7 +267,7 @@
 | TC-DASH-08 | Thống kê | Doanh thu tháng khớp tổng đơn không huỷ | Khớp số liệu | true | ✅ Đạt |
 | TC-DASH-09 | Thống kê | Doanh thu theo danh mục có dữ liệu | Có rows | true | ✅ Đạt |
 | TC-DASH-10 | Thống kê | Tổng doanh thu danh mục = tổng từng dòng | Khớp tổng | true | ✅ Đạt |
-| TC-DASH-11 | Thống kê | Cảnh báo tồn kho thấp dùng ngưỡng 100 | threshold = 100 | 100 | ✅ Đạt |
+| TC-DASH-11 | Thống kê | Cảnh báo tồn kho thấp dùng ngưỡng 20 | threshold = 20 | 20 | ✅ Đạt |
 | TC-DASH-12 | Thống kê | KHÁCH HÀNG không xem được thống kê | HTTP 403 | 403 | ✅ Đạt |
 | TC-SEC-01 | Phân quyền | Không đăng nhập bị chặn ở GET /users | HTTP 401 | 401 | ✅ Đạt |
 | TC-SEC-02 | Phân quyền | Không đăng nhập bị chặn ở GET /customers | HTTP 401 | 401 | ✅ Đạt |

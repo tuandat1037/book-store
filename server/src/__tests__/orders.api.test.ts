@@ -188,4 +188,29 @@ describe('Khách hàng tự hủy đơn của mình', () => {
       .send({ reason: 'Muốn hủy đơn đang giao' });
     expect(cancel.status).toBe(400);
   });
+
+  it('TC-ORD-11: đơn COD khi chuyển DELIVERED -> tự động payment_status = PAID', async () => {
+    const created = await request(app)
+      .post('/api/orders')
+      .send({ ...SHIP, payment_method: 'COD', items: [{ book_id: BOOK_ID, quantity: 1 }] });
+    expect(created.status).toBe(201);
+    const id = Number(created.body.orderId);
+    createdOrderIds.push(id);
+
+    // Kiểm tra ban đầu UNPAID
+    const check1 = await request(app).get(`/api/orders/${id}`).set('Authorization', `Bearer ${adminToken}`);
+    expect(check1.body.order?.payment_status).toBe('UNPAID');
+
+    // Chuyển sang DELIVERED
+    const res = await request(app)
+      .put(`/api/orders/${id}/status`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ order_status: 'DELIVERED' });
+    expect(res.status).toBe(200);
+
+    // Kiểm tra sau khi giao thành công -> tự động PAID
+    const check2 = await request(app).get(`/api/orders/${id}`).set('Authorization', `Bearer ${adminToken}`);
+    expect(check2.body.order?.payment_status).toBe('PAID');
+  });
 });
+
