@@ -352,16 +352,14 @@ export async function cancelOrder(req: AuthRequest, res: Response) {
     const order = await queryOne('SELECT * FROM orders WHERE id = ? OR order_code = ?', [id, id]);
     if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
 
-    // Khách hàng chỉ được hủy ĐƠN CỦA MÌNH và khi đơn còn ở trạng thái
-    // chờ xác nhận / đã xác nhận (chưa đóng gói, chưa giao).
-    // Đơn vãng lai (user_id null) thì khách phải liên hệ shop để hủy.
+    // Khách hàng chỉ được hủy đơn của chính mình khi đơn còn ở trạng thái Chờ xác nhận (PENDING).
     if (req.user?.role_name === 'CUSTOMER') {
       if (!order.user_id || Number(order.user_id) !== Number(req.user.id)) {
-        return res.status(403).json({ message: 'Bạn chỉ được hủy đơn hàng của chính mình' });
+        return res.status(403).json({ message: 'Bạn không có quyền thao tác trên đơn hàng này' });
       }
-      if (!['PENDING', 'CONFIRMED'].includes(order.order_status)) {
+      if (order.order_status !== 'PENDING') {
         return res.status(400).json({
-          message: `Đơn hàng đang ở trạng thái "${translateStatus(order.order_status)}" nên bạn không thể tự hủy. Vui lòng liên hệ cửa hàng để được hỗ trợ.`
+          message: `Đơn hàng đang ở trạng thái "${translateStatus(order.order_status)}", không thể tự hủy trực tuyến. Vui lòng liên hệ hỗ trợ khách hàng của nhà sách.`
         });
       }
     }
