@@ -105,7 +105,7 @@ ON DUPLICATE KEY UPDATE `title` = VALUES(`title`);
 
 -- Sample Orders
 INSERT INTO `orders` (`id`, `order_code`, `user_id`, `customer_name`, `customer_email`, `customer_phone`, `shipping_address`, `shipping_province`, `shipping_district`, `shipping_ward`, `subtotal`, `discount_amount`, `shipping_fee`, `total_amount`, `payment_method`, `payment_status`, `order_status`, `created_at`) VALUES
-(1, 'DH202609001', 3, 'Nguyễn Văn An', 'khachhang@gmail.com', '0987654321', '123 Nguyễn Trãi', 'TP. Hồ Chí Minh', 'Quận 1', 'Bến Thành', 120000.00, 20000.00, 20000.00, 120000.00, 'COD', 'UNPAID', 'DELIVERED', '2026-09-10 10:15:00'),
+(1, 'DH202609001', 3, 'Nguyễn Văn An', 'khachhang@gmail.com', '0987654321', '123 Nguyễn Trãi', 'TP. Hồ Chí Minh', 'Quận 1', 'Bến Thành', 120000.00, 20000.00, 20000.00, 120000.00, 'COD', 'PAID', 'DELIVERED', '2026-09-10 10:15:00'),
 (2, 'DH202609002', 3, 'Nguyễn Văn An', 'khachhang@gmail.com', '0987654321', '123 Nguyễn Trãi', 'TP. Hồ Chí Minh', 'Quận 1', 'Bến Thành', 148000.00, 0.00, 20000.00, 168000.00, 'BANKING', 'PAID', 'SHIPPING', '2026-09-14 14:30:00')
 ON DUPLICATE KEY UPDATE `order_code` = VALUES(`order_code`);
 

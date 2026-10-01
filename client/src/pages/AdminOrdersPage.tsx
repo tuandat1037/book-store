@@ -95,10 +95,14 @@ export const AdminOrdersPage: React.FC = () => {
 
   const handleUpdateStatus = async (orderId: number, status: string) => {
     try {
-      await api.put(`/orders/${orderId}/status`, { order_status: status });
+      const res = await api.put(`/orders/${orderId}/status`, { order_status: status });
       showToast('Cập nhật trạng thái đơn hàng thành công', 'success');
       if (selectedOrder) {
-        setSelectedOrder({ ...selectedOrder, order_status: status as any });
+        setSelectedOrder({
+          ...selectedOrder,
+          order_status: status as any,
+          payment_status: res.data?.payment_status || (status === 'DELIVERED' && selectedOrder.payment_method === 'COD' ? 'PAID' : selectedOrder.payment_status)
+        });
       }
       fetchOrders();
     } catch (error: any) {
@@ -564,9 +568,14 @@ export const AdminOrdersPage: React.FC = () => {
                   </strong>
                 </p>
               </div>
-              <span className={`inline-flex items-center text-[10px] font-extrabold px-2 py-0.5 rounded-sm shrink-0 ${(STATUS_META[selectedOrder.order_status] || { cls: 'bg-gray-100 text-gray-600' }).cls}`}>
-                {(STATUS_META[selectedOrder.order_status] || { label: selectedOrder.order_status }).label.toUpperCase()}
-              </span>
+              <div className="flex flex-col items-end gap-1.5 shrink-0">
+                <span className={`inline-flex items-center text-[10px] font-extrabold px-2 py-0.5 rounded-sm ${(STATUS_META[selectedOrder.order_status] || { cls: 'bg-gray-100 text-gray-600' }).cls}`}>
+                  {(STATUS_META[selectedOrder.order_status] || { label: selectedOrder.order_status }).label.toUpperCase()}
+                </span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-sm ${selectedOrder.payment_status === 'PAID' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-800'}`}>
+                  {selectedOrder.payment_method} · {selectedOrder.payment_status === 'PAID' ? 'Đã thanh toán' : selectedOrder.payment_status === 'REFUNDED' ? 'Đã hoàn tiền' : 'Chưa thanh toán'}
+                </span>
+              </div>
             </div>
 
             <div className="divide-y divide-gray-100 max-h-48 overflow-y-auto">

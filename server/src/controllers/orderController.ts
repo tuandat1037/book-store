@@ -463,12 +463,24 @@ export async function updateOrderStatus(req: AuthRequest, res: Response) {
 
     // Chỉ gửi 1 trong 2 trường cũng phải chạy: mysql2 không nhận undefined, phải dùng null
     // để COALESCE giữ nguyên giá trị cũ.
+    let newPaymentStatus = payment_status ?? null;
+    const finalOrderStatus = order_status || currentOrder.order_status;
+
+    // Đối với đơn COD khi giao hàng thành công (DELIVERED):
+    // Khách hàng nhận hàng và thanh toán tiền mặt cho shipper -> tự động chuyển sang 'PAID' (Đã thanh toán)
+    if (finalOrderStatus === 'DELIVERED' && currentOrder.payment_method === 'COD' && (!payment_status || payment_status === 'UNPAID')) {
+      newPaymentStatus = 'PAID';
+    }
+
     await query(
       'UPDATE orders SET order_status = COALESCE(?, order_status), payment_status = COALESCE(?, payment_status), updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-      [order_status ?? null, payment_status ?? null, id]
+      [order_status ?? null, newPaymentStatus, id]
     );
 
-    res.json({ message: 'Cập nhật trạng thái đơn hàng thành công' });
+    res.json({
+      message: 'Cập nhật trạng thái đơn hàng thành công',
+      payment_status: newPaymentStatus || currentOrder.payment_status
+    });
   } catch (error: any) {
     res.status(500).json({ message: error.message });
   }
