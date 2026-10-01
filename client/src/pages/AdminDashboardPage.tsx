@@ -61,13 +61,16 @@ export const AdminDashboardPage: React.FC = () => {
     revenueSummary: null,
     revenueByCategory: null,
     monthlyRevenue: [],
-    lowStock: { threshold: 10, outOfStockCount: 0, lowStockCount: 0, books: [] }
+    lowStock: { threshold: 20, outOfStockCount: 0, lowStockCount: 0, books: [] }
   });
 
   const [loading, setLoading] = useState(true);
   // Phân trang bảng Cảnh Báo Tồn Kho: 10 sách / trang để không kéo dài web
   const [lowStockPage, setLowStockPage] = useState(1);
   const LOW_STOCK_PAGE_SIZE = 10;
+  // Phân trang bảng Sách Theo Danh Mục: 5 danh mục / trang
+  const [catPage, setCatPage] = useState(1);
+  const CAT_PAGE_SIZE = 5;
 
   const fetchStats = () => {
     setLoading(true);
@@ -139,6 +142,14 @@ export const AdminDashboardPage: React.FC = () => {
   const bookCountFromCategories = catStats.reduce((sum, c) => sum + Number(c.book_count || 0), 0);
   const maxCatBooks = Math.max(...catStats.map((c) => Number(c.book_count || 0)), 1);
 
+  // Cắt danh sách danh mục theo trang (kẹp trang hợp lệ khi dữ liệu đổi)
+  const catTotalPages = Math.max(1, Math.ceil(categoriesWithBooks.length / CAT_PAGE_SIZE));
+  const safeCatPage = Math.min(Math.max(1, catPage), catTotalPages);
+  const catPageItems = categoriesWithBooks.slice(
+    (safeCatPage - 1) * CAT_PAGE_SIZE,
+    safeCatPage * CAT_PAGE_SIZE
+  );
+
   return (
     <div className="space-y-8">
       
@@ -206,7 +217,7 @@ export const AdminDashboardPage: React.FC = () => {
             <div>
               <h2 className="text-sm font-extrabold uppercase text-gray-800">Cảnh Báo Tồn Kho</h2>
               <p className="text-[11px] text-gray-400 mt-0.5">
-                Sách còn từ {lowStock?.threshold ?? 10} cuốn trở xuống cần nhập thêm
+                Sách còn từ {lowStock?.threshold ?? 20} cuốn trở xuống cần nhập thêm
               </p>
             </div>
           </div>
@@ -379,7 +390,7 @@ export const AdminDashboardPage: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {categoriesWithBooks.map((c) => {
+                {catPageItems.map((c) => {
                   const pct = Math.round((Number(c.book_count || 0) / maxCatBooks) * 100);
                   return (
                     <tr
@@ -406,6 +417,43 @@ export const AdminDashboardPage: React.FC = () => {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+        {/* Pagination: 5 danh mục / trang */}
+        {categoriesWithBooks.length > 0 && catTotalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-gray-100 bg-gray-50/50">
+            <p className="text-[11px] text-gray-500">
+              Hiển thị <span className="font-bold text-gray-800">{catPageItems.length}</span> / <span className="font-bold text-gray-800">{categoriesWithBooks.length}</span> danh mục — Trang <span className="font-bold text-kimdong-red">{safeCatPage}</span> / {catTotalPages}
+            </p>
+            <div className="flex items-center gap-1.5">
+              <button
+                disabled={safeCatPage <= 1}
+                onClick={() => setCatPage((p) => Math.max(1, p - 1))}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                ‹ Trước
+              </button>
+              {Array.from({ length: catTotalPages }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setCatPage(p)}
+                  className={`w-8 h-8 rounded-lg text-[11px] font-bold transition-colors ${
+                    safeCatPage === p
+                      ? 'bg-kimdong-red text-white shadow'
+                      : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-100'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                disabled={safeCatPage >= catTotalPages}
+                onClick={() => setCatPage((p) => Math.min(catTotalPages, p + 1))}
+                className="px-3 py-1.5 rounded-lg text-[11px] font-bold border border-gray-200 bg-white text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                Sau ›
+              </button>
+            </div>
           </div>
         )}
       </div>

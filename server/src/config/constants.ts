@@ -1,10 +1,10 @@
 /**
  * Ngưỡng cảnh báo tồn kho dùng chung cho Dashboard và Quản Lý Kho.
- * Còn ≤ ngưỡng  -> "sắp hết"
+ * Còn ≤ ngưỡng  -> "sắp hết" (dưới 20 cuốn)
  * Bằng 0 cuốn   -> "hết hàng"
  * Lớn hơn ngưỡng -> "còn hàng"
  */
-export const LOW_STOCK_THRESHOLD = 100;
+export const LOW_STOCK_THRESHOLD = 20;
 
 /** Trạng thái kho của một cuốn sách */
 export type StockStatus = 'OUT_OF_STOCK' | 'LOW_STOCK' | 'IN_STOCK';

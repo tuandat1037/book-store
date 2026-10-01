@@ -23,7 +23,7 @@ export const AdminLayout: React.FC = () => {
     { label: 'Quản Lý Tác Giả', path: '/admin/authors', icon: PenLine, adminOnly: false },
     { label: 'Quản Lý Đơn Hàng', path: '/admin/orders', icon: ShoppingBag, adminOnly: false },
     { label: 'Quản Lý Khuyến Mãi', path: '/admin/promotions', icon: Ticket, adminOnly: false },
-    { label: 'Quản Lý Banner', path: '/admin/banners', icon: Megaphone, adminOnly: false },
+    { label: 'Quản Lý Banner', path: '/admin/banners', icon: Megaphone, adminOnly: true },
     { label: 'Quản Lý Khách Hàng', path: '/admin/customers', icon: UserRound, adminOnly: false },
     { label: 'Tài Khoản Hệ Thống', path: '/admin/users', icon: Users, adminOnly: true },
   ].filter((item) => !item.adminOnly || user.role === 'ADMIN');

@@ -76,10 +76,18 @@ export async function createOrder(req: AuthRequest, res: Response) {
     const order_code = 'DH' + Date.now().toString().slice(-8) + Math.floor(Math.random() * 100);
     const userId = req.user?.id || null;
 
+    // MÔ PHỎNG THANH TOÁN (đồ án, không kết nối cổng thanh toán thật):
+    // - COD: chưa thu tiền -> UNPAID, thu khi giao hàng.
+    // - BANKING / MOMO: coi như khách đã chuyển khoản demo ở trang Checkout
+    //   (giao diện bắt tick xác nhận) -> PAID. Không có đối soát ngân hàng/ví thật.
+    // Nếu tích hợp thật (VNPay/MoMo): đổi chỗ này thành 'UNPAID' + chờ IPN/callback
+    // rồi mới UPDATE payment_status = 'PAID' theo mã giao dịch.
+    const prepaidSimulated = payment_method === 'BANKING' || payment_method === 'MOMO';
+
     const resOrder = await query(
       `INSERT INTO orders (order_code, user_id, customer_name, customer_email, customer_phone, shipping_address, shipping_province, shipping_district, shipping_ward, notes, subtotal, discount_amount, shipping_fee, total_amount, payment_method, payment_status, order_status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'PENDING')`,
-      [order_code, userId, customer_name, customer_email, customer_phone, shipping_address, shipping_province, shipping_district, shipping_ward, notes || '', subtotal, discount_amount, shipping_fee, total_amount, payment_method || 'COD', payment_method === 'BANKING' ? 'PAID' : 'UNPAID']
+      [order_code, userId, customer_name, customer_email, customer_phone, shipping_address, shipping_province, shipping_district, shipping_ward, notes || '', subtotal, discount_amount, shipping_fee, total_amount, payment_method || 'COD', prepaidSimulated ? 'PAID' : 'UNPAID']
     );
 
     const orderId = (resOrder as any)[0]?.insertId || (resOrder as any).insertId;

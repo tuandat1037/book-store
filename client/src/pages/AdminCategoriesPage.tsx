@@ -10,7 +10,7 @@ interface CategoryRow extends Category {
   children?: CategoryRow[];
 }
 
-const EMPTY_FORM = { name: '', parent_id: '' as '' | number, description: '', image: '', display_order: 0 };
+const EMPTY_FORM = { name: '', parent_id: '' as '' | number, description: '', display_order: 0 };
 
 export const AdminCategoriesPage: React.FC = () => {
   const [tree, setTree] = useState<CategoryRow[]>([]);
@@ -44,7 +44,6 @@ export const AdminCategoriesPage: React.FC = () => {
         name: cat.name,
         parent_id: cat.parent_id ?? '',
         description: cat.description || '',
-        image: cat.image || '',
         display_order: cat.display_order ?? 0
       });
     } else {
@@ -212,26 +211,14 @@ export const AdminCategoriesPage: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-bold text-gray-700 mb-1">Thứ tự hiển thị</label>
-                  <input
-                    type="number"
-                    value={formData.display_order}
-                    onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
-                    className="w-full p-2.5 rounded-lg border border-gray-200 outline-none focus:border-kimdong-red"
-                  />
-                </div>
-                <div>
-                  <label className="block font-bold text-gray-700 mb-1">URL ảnh (tùy chọn)</label>
-                  <input
-                    type="text"
-                    value={formData.image}
-                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                    placeholder="https://..."
-                    className="w-full p-2.5 rounded-lg border border-gray-200 outline-none focus:border-kimdong-red"
-                  />
-                </div>
+              <div>
+                <label className="block font-bold text-gray-700 mb-1">Thứ tự hiển thị</label>
+                <input
+                  type="number"
+                  value={formData.display_order}
+                  onChange={(e) => setFormData({ ...formData, display_order: parseInt(e.target.value) || 0 })}
+                  className="w-full p-2.5 rounded-lg border border-gray-200 outline-none focus:border-kimdong-red"
+                />
               </div>
 
               <div className="bg-red-50/60 rounded-lg p-3 border border-red-100 text-[11px] text-gray-600 flex gap-2">

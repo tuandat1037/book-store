@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { query, queryOne } from '../config/db.js';
+import { AuthRequest } from '../middleware/auth.js';
 
-export async function getBooks(req: Request, res: Response) {
+export async function getBooks(req: AuthRequest, res: Response) {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 12;
@@ -15,8 +16,20 @@ export async function getBooks(req: Request, res: Response) {
     const max_price = req.query.max_price ? parseFloat(req.query.max_price as string) : null;
     const on_sale = req.query.on_sale === 'true';
 
-    let whereClause = "WHERE b.status = 'ACTIVE' AND b.deleted_at IS NULL";
+    // Lọc trạng thái kinh doanh: mặc định chỉ sách đang bán (ACTIVE).
+    // Nhân viên / quản trị được lọc thêm INACTIVE hoặc ALL để quản lý
+    // sách ngừng kinh doanh; khách vãng lai luôn chỉ thấy ACTIVE.
+    const isStaff = req.user?.role_name === 'ADMIN' || req.user?.role_name === 'EMPLOYEE';
+    const statusParam = typeof req.query.status === 'string' ? req.query.status.toUpperCase() : '';
+    const statusFilter = isStaff && ['ACTIVE', 'INACTIVE', 'ALL'].includes(statusParam) ? statusParam : 'ACTIVE';
+
+    let whereClause = 'WHERE b.deleted_at IS NULL';
     const params: any[] = [];
+
+    if (statusFilter !== 'ALL') {
+      whereClause += ' AND b.status = ?';
+      params.push(statusFilter);
+    }
 
     if (category_id) {
       // Includes subcategories
@@ -283,7 +296,7 @@ export async function createBook(req: Request, res: Response) {
   }
 }
 
-export async function updateBook(req: Request, res: Response) {
+export async function updateBook(req: AuthRequest, res: Response) {
   try {
     const { id } = req.params;
     const {
@@ -299,6 +312,12 @@ export async function updateBook(req: Request, res: Response) {
     const newStatus = status === undefined ? null : String(status).toUpperCase();
     if (newStatus !== null && !['ACTIVE', 'INACTIVE'].includes(newStatus)) {
       return res.status(400).json({ message: 'Trạng thái sách không hợp lệ (chỉ nhận ACTIVE hoặc INACTIVE)' });
+    }
+
+    // Chỉ ADMIN được ngừng kinh doanh / mở bán lại (đổi status).
+    // Nhân viên chỉ được thêm mới và chỉnh sửa thông tin sách.
+    if (newStatus !== null && req.user?.role_name !== 'ADMIN') {
+      return res.status(403).json({ message: 'Chỉ quản trị viên được ngừng kinh doanh hoặc mở bán lại sách' });
     }
 
     await query(

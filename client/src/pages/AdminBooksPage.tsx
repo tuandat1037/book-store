@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Search, X, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, X, Image as ImageIcon, EyeOff, Eye } from 'lucide-react';
 import api from '../services/api';
 import { Book, Category, Author } from '../types';
 import { Modal } from '../components/common/Modal';
 import { formatVND } from '../utils/format';
 import { useToast } from '../context/ToastContext';
+import { useAuth } from '../context/AuthContext';
 
 export const AdminBooksPage: React.FC = () => {
   const location = useLocation();
+  const { user } = useAuth();
+  // Chỉ ADMIN được xóa sách / ngừng kinh doanh / mở bán lại
+  const isAdmin = user?.role === 'ADMIN';
   const [books, setBooks] = useState<Book[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [authors, setAuthors] = useState<Author[]>([]);
@@ -18,10 +22,16 @@ export const AdminBooksPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0, totalPages: 1 });
   const PAGE_SIZE = 10;
+  // Lọc trạng thái kinh doanh: đang bán / ngừng kinh doanh
+  const [statusFilter, setStatusFilter] = useState<'ACTIVE' | 'INACTIVE'>('ACTIVE');
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
+
+  // Hộp thoại xác nhận Xóa / Ngừng kinh doanh / Mở bán lại
+  const [confirmTarget, setConfirmTarget] = useState<{ book: Book; action: 'delete' | 'discontinue' | 'reactivate' } | null>(null);
+  const [confirming, setConfirming] = useState(false);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -43,7 +53,7 @@ export const AdminBooksPage: React.FC = () => {
 
   const fetchBooks = (page = currentPage) => {
     setLoading(true);
-    api.get(`/books?limit=${PAGE_SIZE}&page=${page}&q=${encodeURIComponent(searchQuery)}`)
+    api.get(`/books?limit=${PAGE_SIZE}&page=${page}&status=${statusFilter}&q=${encodeURIComponent(searchQuery)}`)
       .then((res) => {
         setBooks(res.data.books || []);
         if (res.data.pagination) setPagination(res.data.pagination);
@@ -59,7 +69,7 @@ export const AdminBooksPage: React.FC = () => {
 
   useEffect(() => {
     fetchBooks(currentPage);
-  }, [searchQuery, currentPage]);
+  }, [searchQuery, currentPage, statusFilter]);
 
   // Nút "Nhập thêm" từ Dashboard cảnh báo tồn kho chuyển sang đây kèm từ khóa sách
   useEffect(() => {
@@ -137,19 +147,33 @@ export const AdminBooksPage: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa cuốn sách này?')) return;
+  /** Thực thi hành động đã xác nhận trong hộp thoại: Xóa / Ngừng KD / Mở bán lại */
+  const handleConfirmAction = async () => {
+    if (!confirmTarget) return;
+    const { book, action } = confirmTarget;
+    setConfirming(true);
     try {
-      const res = await api.delete(`/books/${id}`);
-      showToast(res.data.message || 'Xóa sách thành công', 'info');
-      // Nếu xóa cuốn cuối cùng của trang (trừ trang 1) thì lùi về trang trước
-      if (books.length === 1 && currentPage > 1) {
+      if (action === 'delete') {
+        const res = await api.delete(`/books/${book.id}`);
+        showToast(res.data.message || 'Xóa sách thành công', 'info');
+      } else if (action === 'discontinue') {
+        await api.put(`/books/${book.id}`, { status: 'INACTIVE' });
+        showToast(`Đã chuyển "${book.title}" sang Ngừng kinh doanh (ẩn khỏi trang bán hàng)`, 'info');
+      } else {
+        await api.put(`/books/${book.id}`, { status: 'ACTIVE' });
+        showToast(`Đã mở bán lại "${book.title}"`, 'success');
+      }
+      setConfirmTarget(null);
+      // Xóa cuốn cuối của trang thì lùi về trang trước, còn lại tải lại danh sách
+      if (action === 'delete' && books.length === 1 && currentPage > 1) {
         setCurrentPage((p) => p - 1);
       } else {
         fetchBooks();
       }
     } catch (error: any) {
-      showToast(error.response?.data?.message || 'Lỗi xóa sách', 'error');
+      showToast(error.response?.data?.message || 'Thao tác thất bại', 'error');
+    } finally {
+      setConfirming(false);
     }
   };
 
@@ -159,7 +183,10 @@ export const AdminBooksPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-black text-gray-900">Quản Lý Tủ Sách NXB Kim Đồng</h1>
-          <p className="text-xs text-gray-400">Danh sách, thêm mới, chỉnh sửa thông tin sách</p>
+          <p className="text-xs text-gray-400">
+            Danh sách, thêm mới, chỉnh sửa thông tin sách
+            {!isAdmin && ' — Nhân viên chỉ được thêm mới và chỉnh sửa (xóa / ngừng kinh doanh cần quản trị viên)'}
+          </p>
         </div>
 
         <button
@@ -169,6 +196,27 @@ export const AdminBooksPage: React.FC = () => {
           <Plus className="w-4 h-4" />
           <span>Thêm Sách Mới</span>
         </button>
+      </div>
+
+      {/* Lọc trạng thái kinh doanh */}
+      <div className="bg-white px-4 py-3 rounded-3xl border border-gray-100 shadow-sm flex items-center gap-2">
+        <span className="text-[11px] font-bold text-gray-400 uppercase mr-1">Trạng thái:</span>
+        {([
+          { key: 'ACTIVE', label: 'Đang bán' },
+          { key: 'INACTIVE', label: 'Ngừng kinh doanh' }
+        ] as const).map((f) => (
+          <button
+            key={f.key}
+            onClick={() => { setStatusFilter(f.key); setCurrentPage(1); }}
+            className={`text-[11px] font-bold px-3 py-1.5 rounded-lg border transition-colors ${
+              statusFilter === f.key
+                ? 'bg-kimdong-red text-white border-kimdong-red shadow'
+                : 'text-gray-600 border-gray-200 hover:border-kimdong-red hover:text-kimdong-red hover:bg-red-50'
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
       </div>
 
       {/* Search Input */}
@@ -217,7 +265,12 @@ export const AdminBooksPage: React.FC = () => {
                     <img src={book.cover_image} alt="" className="w-10 h-12 object-contain rounded bg-gray-50 border p-0.5" />
                     <div>
                       <p className="font-bold text-gray-800 line-clamp-1">{book.title}</p>
-                      <p className="text-[10px] text-gray-400">{book.author_name || ''}</p>
+                      <p className="text-[10px] text-gray-400 flex items-center gap-1.5">
+                        {book.author_name || ''}
+                        {book.status === 'INACTIVE' && (
+                          <span className="font-bold bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded-sm">NGỪNG KD</span>
+                        )}
+                      </p>
                     </div>
                   </td>
                   <td className="py-3 px-4 font-medium text-gray-600">{book.category_name}</td>
@@ -235,13 +288,33 @@ export const AdminBooksPage: React.FC = () => {
                     >
                       <Edit2 className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => handleDelete(book.id)}
-                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
-                      title="Xóa"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {isAdmin && book.status !== 'INACTIVE' && (
+                      <button
+                        onClick={() => setConfirmTarget({ book, action: 'discontinue' })}
+                        className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg"
+                        title="Ngừng kinh doanh (ẩn khỏi trang bán hàng)"
+                      >
+                        <EyeOff className="w-4 h-4" />
+                      </button>
+                    )}
+                    {isAdmin && book.status === 'INACTIVE' && (
+                      <button
+                        onClick={() => setConfirmTarget({ book, action: 'reactivate' })}
+                        className="p-1.5 text-green-600 hover:bg-green-50 rounded-lg"
+                        title="Mở bán lại"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    )}
+                    {isAdmin && (
+                      <button
+                        onClick={() => setConfirmTarget({ book, action: 'delete' })}
+                        className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"
+                        title="Xóa"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </td>
                 </tr>
                 ))
@@ -287,6 +360,82 @@ export const AdminBooksPage: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Hộp thoại xác nhận Xóa / Ngừng kinh doanh / Mở bán lại */}
+      {confirmTarget && (
+        <Modal
+          title={
+            confirmTarget.action === 'delete'
+              ? `Xóa sách "${confirmTarget.book.title}"?`
+              : confirmTarget.action === 'discontinue'
+                ? `Ngừng kinh doanh "${confirmTarget.book.title}"?`
+                : `Mở bán lại "${confirmTarget.book.title}"?`
+          }
+          onClose={() => setConfirmTarget(null)}
+        >
+          <div className="space-y-3 text-xs text-gray-600">
+            <div className="bg-gray-50 rounded-lg p-3 flex items-center gap-3">
+              {confirmTarget.book.cover_image ? (
+                <img src={confirmTarget.book.cover_image} alt="" className="w-10 h-12 object-contain rounded border bg-white p-0.5 shrink-0" />
+              ) : (
+                <div className="w-10 h-12 rounded border bg-white flex items-center justify-center shrink-0">
+                  <ImageIcon className="w-4 h-4 text-gray-300" />
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="font-bold text-gray-800 line-clamp-2">{confirmTarget.book.title}</p>
+                <p className="text-[11px] text-gray-400">
+                  Tồn kho: {confirmTarget.book.stock} cuốn · Đã bán: {confirmTarget.book.sold_quantity || 0}
+                </p>
+              </div>
+            </div>
+            {confirmTarget.action === 'delete' && (
+              <p className="leading-relaxed">
+                Sách sẽ bị <strong>xóa khỏi hệ thống</strong>. Nếu sách đã từng có trong đơn hàng,
+                hệ thống tự chuyển sang trạng thái <strong>Ẩn</strong> thay vì xóa hẳn để bảo toàn dữ liệu đơn.
+              </p>
+            )}
+            {confirmTarget.action === 'discontinue' && (
+              <p className="leading-relaxed">
+                Sách chuyển sang trạng thái <strong>Ngừng kinh doanh</strong> và bị
+                <strong> ẩn khỏi trang bán hàng</strong>. Bạn có thể mở bán lại bất cứ lúc nào ở bộ lọc "Ngừng kinh doanh".
+              </p>
+            )}
+            {confirmTarget.action === 'reactivate' && (
+              <p className="leading-relaxed">
+                Sách sẽ <strong>xuất hiện lại trên trang bán hàng</strong> với tồn kho hiện tại ({confirmTarget.book.stock} cuốn).
+              </p>
+            )}
+            <div className="flex justify-end gap-3 pt-1">
+              <button
+                type="button"
+                onClick={() => setConfirmTarget(null)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl font-bold"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmAction}
+                disabled={confirming}
+                className={`px-5 py-2 text-white font-extrabold rounded-xl shadow disabled:opacity-50 ${
+                  confirmTarget.action === 'reactivate'
+                    ? 'bg-green-600 hover:bg-green-700'
+                    : 'bg-kimdong-red hover:bg-kimdong-darkred'
+                }`}
+              >
+                {confirming
+                  ? 'Đang xử lý...'
+                  : confirmTarget.action === 'delete'
+                    ? 'Xác Nhận Xóa'
+                    : confirmTarget.action === 'discontinue'
+                      ? 'Xác Nhận Ngừng KD'
+                      : 'Xác Nhận Mở Bán'}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Book Form Modal */}
       {isModalOpen && (

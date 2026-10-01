@@ -28,6 +28,9 @@ export const CheckoutPage: React.FC = () => {
 
   const [submitting, setSubmitting] = useState(false);
 
+  // Mô phỏng thanh toán: khách tick xác nhận đã chuyển khoản demo thì mới cho đặt đơn
+  const [transferConfirmed, setTransferConfirmed] = useState(false);
+
   // Mã giảm giá áp dụng từ trang Giỏ hàng
   const [promoCode, setPromoCode] = useState((location.state as any)?.promoCode || '');
   const [promoInput, setPromoInput] = useState((location.state as any)?.promoCode || '');
@@ -88,7 +91,10 @@ export const CheckoutPage: React.FC = () => {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    // Đổi phương thức thanh toán thì bắt xác nhận lại từ đầu
+    if (name === 'payment_method') setTransferConfirmed(false);
   };
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
@@ -96,6 +102,12 @@ export const CheckoutPage: React.FC = () => {
 
     if (!formData.customer_name || !formData.customer_email || !formData.customer_phone || !formData.shipping_address) {
       showToast('Vui lòng nhập đầy đủ thông tin giao hàng', 'error');
+      return;
+    }
+
+    // Thanh toán mô phỏng: bắt buộc tick xác nhận đã chuyển khoản demo
+    if (formData.payment_method !== 'COD' && !transferConfirmed) {
+      showToast('Vui lòng tick xác nhận bạn đã chuyển khoản (mô phỏng demo)', 'error');
       return;
     }
 
@@ -269,18 +281,65 @@ export const CheckoutPage: React.FC = () => {
                   className="mt-1 text-kimdong-red focus:ring-kimdong-red"
                 />
                 <div className="w-full">
-                  <span className="text-xs font-extrabold text-gray-800 block flex items-center gap-1.5">
+                  <span className="text-xs font-extrabold text-gray-800 block flex items-center gap-1.5 flex-wrap">
                     <QrCode className="w-4 h-4 text-kimdong-red" />
-                    Chuyển khoản Ngân hàng (VietQR Instant)
+                    Chuyển khoản ngân hàng
+                    <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">MÔ PHỎNG DEMO</span>
                   </span>
-                  <span className="text-[11px] text-gray-500 block mb-2">Chuyển tiền quét mã QR nhanh chóng.</span>
+                  <span className="text-[11px] text-gray-500 block mb-2">Đồ án mô phỏng — không kết nối cổng thanh toán thật, không trừ tiền thật.</span>
 
                   {formData.payment_method === 'BANKING' && (
                     <div className="mt-3 p-3 bg-white rounded-xl border border-red-100 space-y-2 text-xs">
-                      <p className="font-bold text-gray-800">Thông tin tài khoản NXB Kim Đồng:</p>
+                      <p className="font-bold text-gray-800">Thông tin tài khoản demo của shop:</p>
                       <p className="text-gray-600">Ngân hàng: <span className="font-bold text-gray-800">Vietcombank - Chi nhánh Hà Nội</span></p>
                       <p className="text-gray-600">Số tài khoản: <span className="font-bold text-kimdong-red">1900 571 595 8888</span></p>
                       <p className="text-gray-600">Chủ tài khoản: <span className="font-bold text-gray-800">CTY NXB KIM DONG</span></p>
+                      <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={transferConfirmed}
+                          onChange={(e) => setTransferConfirmed(e.target.checked)}
+                          className="mt-0.5 text-kimdong-red focus:ring-kimdong-red"
+                        />
+                        <span className="text-[11px] text-gray-600">Tôi đã chuyển khoản demo theo thông tin trên (mô phỏng, không trừ tiền thật).</span>
+                      </label>
+                    </div>
+                  )}
+                </div>
+              </label>
+
+              <label className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${
+                formData.payment_method === 'MOMO' ? 'border-kimdong-red bg-red-50/40 shadow-sm' : 'border-gray-200 hover:bg-gray-50'
+              }`}>
+                <input
+                  type="radio"
+                  name="payment_method"
+                  value="MOMO"
+                  checked={formData.payment_method === 'MOMO'}
+                  onChange={handleChange}
+                  className="mt-1 text-kimdong-red focus:ring-kimdong-red"
+                />
+                <div className="w-full">
+                  <span className="text-xs font-extrabold text-gray-800 block flex items-center gap-1.5 flex-wrap">
+                    Ví điện tử MoMo
+                    <span className="text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">MÔ PHỎNG DEMO</span>
+                  </span>
+                  <span className="text-[11px] text-gray-500 block mb-2">Đồ án mô phỏng — không kết nối ví MoMo thật, không trừ tiền thật.</span>
+
+                  {formData.payment_method === 'MOMO' && (
+                    <div className="mt-3 p-3 bg-white rounded-xl border border-red-100 space-y-2 text-xs">
+                      <p className="font-bold text-gray-800">Ví MoMo demo của shop:</p>
+                      <p className="text-gray-600">Số ví: <span className="font-bold text-kimdong-red">0901 234 567</span></p>
+                      <p className="text-gray-600">Tên ví: <span className="font-bold text-gray-800">NXB KIM DONG</span></p>
+                      <label className="flex items-start gap-2 pt-1 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={transferConfirmed}
+                          onChange={(e) => setTransferConfirmed(e.target.checked)}
+                          className="mt-0.5 text-kimdong-red focus:ring-kimdong-red"
+                        />
+                        <span className="text-[11px] text-gray-600">Tôi đã chuyển ví demo theo thông tin trên (mô phỏng, không trừ tiền thật).</span>
+                      </label>
                     </div>
                   )}
                 </div>

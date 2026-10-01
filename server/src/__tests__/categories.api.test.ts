@@ -124,4 +124,19 @@ describe('Phân quyền requireRole', () => {
       .send({ full_name: 'X' });
     expect(res.status).toBe(403);
   });
+
+  it('TC-PERM-07: EMPLOYEE không xem được toàn bộ banner -> 403', async () => {
+    const res = await request(app)
+      .get('/api/banners/all')
+      .set('Authorization', `Bearer ${employeeToken}`);
+    expect(res.status).toBe(403);
+  });
+
+  it('TC-PERM-08: EMPLOYEE không tạo được banner -> 403', async () => {
+    const res = await request(app)
+      .post('/api/banners')
+      .set('Authorization', `Bearer ${employeeToken}`)
+      .send({ title: 'X', cta_link: '/books' });
+    expect(res.status).toBe(403);
+  });
 });

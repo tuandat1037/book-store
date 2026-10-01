@@ -24,7 +24,7 @@ afterAll(async () => {
     if (createdBookId) {
       await request(app).delete(`/api/books/${createdBookId}`).set('Authorization', `Bearer ${adminToken}`);
     }
-    const rows: any[] = await query('SELECT id FROM books WHERE title LIKE ? OR title LIKE ?', ['%Vitest%', 'Sách NV %']);
+    const rows: any[] = await query('SELECT id FROM books WHERE title LIKE ? OR title LIKE ? OR title LIKE ?', ['%Vitest%', 'Sách NV %', 'Sách PQ %']);
     for (const r of rows) {
       await query('DELETE FROM book_images WHERE book_id = ?', [r.id]);
       await query('DELETE FROM books WHERE id = ?', [r.id]);
@@ -163,5 +163,77 @@ describe('CRUD sách (admin)', () => {
   it('TC-ORD-04b (sanity): stock đọc được từ DB', async () => {
     const b = await queryOne('SELECT stock FROM books WHERE id = ?', [1]);
     expect(Number((b as any)?.stock)).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('Phân quyền xóa / ngừng kinh doanh sách (chỉ ADMIN)', () => {
+  let permBookId = 0;
+
+  it('setup: tạo sách để test phân quyền', async () => {
+    const res = await request(app)
+      .post('/api/books')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        title: `Sách PQ ${Date.now()}`, category_id: 6,
+        author_id: 1, publisher_id: 1, price: 30000, stock: 5
+      });
+    expect([200, 201]).toContain(res.status);
+    permBookId = Number(res.body.bookId ?? res.body.id);
+  });
+
+  it('TC-PERM-07: EMPLOYEE DELETE /books/:id -> 403', async () => {
+    const res = await request(app)
+      .delete(`/api/books/${permBookId}`)
+      .set('Authorization', `Bearer ${employeeToken}`);
+    expect(res.status).toBe(403);
+  });
+
+  it('TC-PERM-08: EMPLOYEE PUT status -> 403, nhưng sửa giá vẫn 200', async () => {
+    const bad = await request(app)
+      .put(`/api/books/${permBookId}`)
+      .set('Authorization', `Bearer ${employeeToken}`)
+      .send({ status: 'INACTIVE' });
+    expect(bad.status).toBe(403);
+    const good = await request(app)
+      .put(`/api/books/${permBookId}`)
+      .set('Authorization', `Bearer ${employeeToken}`)
+      .send({ price: 31000 });
+    expect(good.status).toBe(200);
+  });
+
+  it('TC-BOOK-06: ADMIN ngừng KD -> 200, ẩn khỏi list mặc định, hiện ở filter INACTIVE', async () => {
+    const off = await request(app)
+      .put(`/api/books/${permBookId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ status: 'INACTIVE' });
+    expect(off.status).toBe(200);
+
+    const def = await request(app).get('/api/books?limit=1000');
+    expect((def.body.books ?? []).map((b: any) => Number(b.id))).not.toContain(permBookId);
+
+    const ina = await request(app)
+      .get('/api/books?limit=1000&status=INACTIVE')
+      .set('Authorization', `Bearer ${adminToken}`);
+    expect(ina.status).toBe(200);
+    expect((ina.body.books ?? []).map((b: any) => Number(b.id))).toContain(permBookId);
+  });
+
+  it('TC-BOOK-07: CUSTOMER GET ?status=INACTIVE -> không thấy sách ngừng KD', async () => {
+    const res = await request(app)
+      .get('/api/books?limit=1000&status=INACTIVE')
+      .set('Authorization', `Bearer ${customerToken}`);
+    expect(res.status).toBe(200);
+    expect((res.body.books ?? []).map((b: any) => Number(b.id))).not.toContain(permBookId);
+  });
+
+  it('TC-BOOK-08: ADMIN mở bán lại -> 200, hiện lại ở list mặc định (dọn)', async () => {
+    const on = await request(app)
+      .put(`/api/books/${permBookId}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ status: 'ACTIVE' });
+    expect(on.status).toBe(200);
+    const def = await request(app).get('/api/books?limit=1000');
+    expect((def.body.books ?? []).map((b: any) => Number(b.id))).toContain(permBookId);
+    await request(app).delete(`/api/books/${permBookId}`).set('Authorization', `Bearer ${adminToken}`);
   });
 });

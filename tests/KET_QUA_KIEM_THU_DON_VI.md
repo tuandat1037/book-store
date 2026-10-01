@@ -1,6 +1,6 @@
 # Kết quả kiểm thử đơn vị (Unit Test)
 
-Thực hiện lúc: **16/09/2026 23:00**  
+Thực hiện lúc: **01/10/2026 11:56**  
 Bộ kiểm thử: `tests/unit-tests.mjs`  
 Cách chạy: `node tests/unit-tests.mjs`
 
@@ -18,7 +18,7 @@ Cách chạy: `node tests/unit-tests.mjs`
 | # | Nhóm hàm | Hàm được kiểm thử | Số ca | Đạt | Kết quả |
 | --- | --- | --- | ---: | ---: | --- |
 | 1 | Định dạng hiển thị (formatVND, formatDate, calculateDiscountPercent) | `formatVND`, `formatDate`, `calculateDiscountPercent` | 16 | 16 | Đạt |
-| 2 | Trạng thái tồn kho (getStockStatus, ngưỡng 100) | `getStockStatus`, `LOW_STOCK_THRESHOLD` | 12 | 12 | Đạt |
+| 2 | Trạng thái tồn kho (getStockStatus, ngưỡng 20) | `getStockStatus`, `LOW_STOCK_THRESHOLD` | 12 | 12 | Đạt |
 | 3 | Mã khuyến mãi (evaluatePromotion) | `evaluatePromotion` | 20 | 20 | Đạt |
 
 ## 3. Chi tiết từng ca kiểm thử
@@ -44,18 +44,18 @@ Cách chạy: `node tests/unit-tests.mjs`
 | TC-U-FMT-15 | Làm tròn đúng: 100.000 → 66.666 là 33% (33,334% làm tròn thành 33) | 33 | Đạt |
 | TC-U-FMT-16 | Giá khuyến mãi = 0 nghĩa là KHÔNG có khuyến mãi → giảm 0% | 0 | Đạt |
 
-### Nhóm 2 — Trạng thái tồn kho (getStockStatus, ngưỡng 100)
+### Nhóm 2 — Trạng thái tồn kho (getStockStatus, ngưỡng 20)
 
 | Mã | Mô tả | Kết quả mong đợi | Kết quả |
 | --- | --- | --- | --- |
-| TC-U-STK-01 | Ngưỡng cảnh báo mặc định là 100 cuốn | 100 | Đạt |
+| TC-U-STK-01 | Ngưỡng cảnh báo mặc định là 20 cuốn | 20 | Đạt |
 | TC-U-STK-02 | Hết hàng: stock = 0 | OUT_OF_STOCK | Đạt |
 | TC-U-STK-03 | BIÊN DƯỚI: stock = 1 là sắp hết (không phải hết hàng) | LOW_STOCK | Đạt |
-| TC-U-STK-04 | BIÊN TRÊN: stock = 100 vẫn là sắp hết (≤ ngưỡng) | LOW_STOCK | Đạt |
-| TC-U-STK-05 | BIÊN: stock = 101 là còn hàng (> ngưỡng) | IN_STOCK | Đạt |
+| TC-U-STK-04 | BIÊN TRÊN: stock = 20 vẫn là sắp hết (≤ ngưỡng) | LOW_STOCK | Đạt |
+| TC-U-STK-05 | BIÊN: stock = 21 là còn hàng (> ngưỡng) | IN_STOCK | Đạt |
 | TC-U-STK-06 | Tồn kho rất lớn 5.000 vẫn là còn hàng | IN_STOCK | Đạt |
 | TC-U-STK-07 | Số âm -5 được coi là hết hàng (dữ liệu bẩn không gây sập) | OUT_OF_STOCK | Đạt |
-| TC-U-STK-08 | Chuỗi "50" được chuyển thành số 50 → sắp hết | LOW_STOCK | Đạt |
+| TC-U-STK-08 | Chuỗi "15" được chuyển thành số 15 → sắp hết | LOW_STOCK | Đạt |
 | TC-U-STK-09 | Giá trị rác "abc" coi như 0 → hết hàng | OUT_OF_STOCK | Đạt |
 | TC-U-STK-10 | null coi như 0 → hết hàng | OUT_OF_STOCK | Đạt |
 | TC-U-STK-11 | Ngưỡng tuỳ chỉnh: stock=5, ngưỡng=10 → sắp hết | LOW_STOCK | Đạt |

@@ -23,12 +23,9 @@ export const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
 
-  // Chưa đăng nhập thì đá về trang đăng nhập (giỏ hàng bắt buộc đăng nhập)
-  if (!authLoading && !user) {
-    return <Navigate to="/login" replace />;
-  }
-
   // Bỏ chọn những sách đã bị xóa khỏi giỏ (tránh id treo)
+  // (Guard đá về /login nằm cuối component, sau mọi hook — return sớm
+  // trước hook sẽ làm React crash "rendered fewer hooks".)
   useEffect(() => {
     setSelectedIds((prev) => prev.filter((id) => items.some((i) => i.id === id)));
   }, [items]);
@@ -136,6 +133,12 @@ export const CartPage: React.FC = () => {
       });
     return () => { cancelled = true; };
   }, [subtotal]);
+
+  // Chưa đăng nhập thì đá về trang đăng nhập (giỏ hàng bắt buộc đăng nhập).
+  // Đặt sau mọi hook để không phá vỡ thứ tự hooks của React.
+  if (!authLoading && !user) {
+    return <Navigate to="/login" replace />;
+  }
 
   const shippingFee = subtotal >= 200000 ? 0 : 20000;
   const grandTotal = Math.max(0, subtotal - discountAmount + shippingFee);

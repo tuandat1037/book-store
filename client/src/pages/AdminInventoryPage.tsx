@@ -70,7 +70,7 @@ export const AdminInventoryPage: React.FC = () => {
   const [summary, setSummary] = useState<InventorySummary>({
     totalBooks: 0, totalStock: 0, inStockCount: 0, lowStockCount: 0, outOfStockCount: 0, totalValue: 0, totalSold: 0
   });
-  const [threshold, setThreshold] = useState(100);
+  const [threshold, setThreshold] = useState(20);
   const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');

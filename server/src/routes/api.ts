@@ -26,12 +26,13 @@ router.put('/auth/me', authenticateToken, authCtrl.updateProfile);
 router.put('/auth/change-password', authenticateToken, authCtrl.changePassword);
 
 // Books Routes
-router.get('/books', bookCtrl.getBooks);
+router.get('/books', optionalAuth, bookCtrl.getBooks);
 router.get('/books/sections/home', bookCtrl.getHomeSections);
 router.get('/books/:param', bookCtrl.getBookBySlugOrId);
 router.post('/books', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), bookCtrl.createBook);
 router.put('/books/:id', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), bookCtrl.updateBook);
-router.delete('/books/:id', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), bookCtrl.deleteBook);
+// Chỉ ADMIN được xóa sách / ngừng kinh doanh (đổi status). Nhân viên chỉ thêm/sửa.
+router.delete('/books/:id', authenticateToken, requireRole(['ADMIN']), bookCtrl.deleteBook);
 
 // Category Routes
 router.get('/categories', catCtrl.getCategories);
@@ -46,12 +47,12 @@ router.put('/authors/:id', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE'])
 router.delete('/authors/:id', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), authorCtrl.deleteAuthor);
 router.get('/publishers', metaCtrl.getPublishers);
 
-// Banner Routes (public carousel + admin CRUD)
+// Banner Routes (public carousel + ADMIN CRUD — nhân viên không được quản lý banner)
 router.get('/banners', bannerCtrl.getActiveBanners);
-router.get('/banners/all', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), bannerCtrl.getAllBanners);
-router.post('/banners', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), bannerCtrl.createBanner);
-router.put('/banners/:id', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), bannerCtrl.updateBanner);
-router.delete('/banners/:id', authenticateToken, requireRole(['ADMIN', 'EMPLOYEE']), bannerCtrl.deleteBanner);
+router.get('/banners/all', authenticateToken, requireRole(['ADMIN']), bannerCtrl.getAllBanners);
+router.post('/banners', authenticateToken, requireRole(['ADMIN']), bannerCtrl.createBanner);
+router.put('/banners/:id', authenticateToken, requireRole(['ADMIN']), bannerCtrl.updateBanner);
+router.delete('/banners/:id', authenticateToken, requireRole(['ADMIN']), bannerCtrl.deleteBanner);
 
 // Promotion Routes (mã giảm giá: public xem/kiểm tra + admin CRUD)
 router.get('/promotions', promoCtrl.getActivePromotions);

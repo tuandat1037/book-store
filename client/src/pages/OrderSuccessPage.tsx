@@ -46,7 +46,13 @@ export const OrderSuccessPage: React.FC = () => {
 
             <div className="flex justify-between border-b border-gray-200 pb-3">
               <span className="text-gray-500">Hình thức thanh toán:</span>
-              <span className="font-bold text-gray-800">{order.payment_method === 'COD' ? 'Thanh toán COD' : 'Chuyển khoản VietQR'}</span>
+              <span className="font-bold text-gray-800">
+                {order.payment_method === 'COD'
+                  ? 'Thanh toán khi nhận hàng (COD)'
+                  : order.payment_method === 'MOMO'
+                    ? 'Ví MoMo (mô phỏng demo)'
+                    : 'Chuyển khoản ngân hàng (mô phỏng demo)'}
+              </span>
             </div>
 
             <div className="flex justify-between text-sm pt-1">

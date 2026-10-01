@@ -1,5 +1,6 @@
 {
   "devDependencies": {
+    "happy-dom": "^20.14.5",
     "vitest": "^1.6.1"
   }
 }

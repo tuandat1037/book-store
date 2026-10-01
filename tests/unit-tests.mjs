@@ -227,15 +227,15 @@ check('TC-U-FMT-16', 'Giá khuyến mãi = 0 nghĩa là KHÔNG có khuyến mãi
 //
 // Quy tắc nghiệp vụ:
 //   stock = 0            -> OUT_OF_STOCK (Hết hàng)
-//   0 < stock <= 100     -> LOW_STOCK    (Sắp hết)
-//   stock > 100          -> IN_STOCK     (Còn hàng)
+//   0 < stock <= 20      -> LOW_STOCK    (Sắp hết)
+//   stock > 20           -> IN_STOCK     (Còn hàng)
 
-group('Nhóm 2 — Trạng thái tồn kho (getStockStatus, ngưỡng 100)');
+group('Nhóm 2 — Trạng thái tồn kho (getStockStatus, ngưỡng 20)');
 
 const { getStockStatus, LOW_STOCK_THRESHOLD } = stock;
 
-check('TC-U-STK-01', 'Ngưỡng cảnh báo mặc định là 100 cuốn',
-  100, LOW_STOCK_THRESHOLD, 100);
+check('TC-U-STK-01', 'Ngưỡng cảnh báo mặc định là 20 cuốn',
+  20, LOW_STOCK_THRESHOLD, 20);
 
 check('TC-U-STK-02', 'Hết hàng: stock = 0', 'OUT_OF_STOCK',
   getStockStatus(0), 'OUT_OF_STOCK');
@@ -243,11 +243,11 @@ check('TC-U-STK-02', 'Hết hàng: stock = 0', 'OUT_OF_STOCK',
 check('TC-U-STK-03', 'BIÊN DƯỚI: stock = 1 là sắp hết (không phải hết hàng)',
   'LOW_STOCK', getStockStatus(1), 'LOW_STOCK');
 
-check('TC-U-STK-04', 'BIÊN TRÊN: stock = 100 vẫn là sắp hết (≤ ngưỡng)',
-  'LOW_STOCK', getStockStatus(100), 'LOW_STOCK');
+check('TC-U-STK-04', 'BIÊN TRÊN: stock = 20 vẫn là sắp hết (≤ ngưỡng)',
+  'LOW_STOCK', getStockStatus(20), 'LOW_STOCK');
 
-check('TC-U-STK-05', 'BIÊN: stock = 101 là còn hàng (> ngưỡng)',
-  'IN_STOCK', getStockStatus(101), 'IN_STOCK');
+check('TC-U-STK-05', 'BIÊN: stock = 21 là còn hàng (> ngưỡng)',
+  'IN_STOCK', getStockStatus(21), 'IN_STOCK');
 
 check('TC-U-STK-06', 'Tồn kho rất lớn 5.000 vẫn là còn hàng',
   'IN_STOCK', getStockStatus(5000), 'IN_STOCK');
@@ -255,8 +255,8 @@ check('TC-U-STK-06', 'Tồn kho rất lớn 5.000 vẫn là còn hàng',
 check('TC-U-STK-07', 'Số âm -5 được coi là hết hàng (dữ liệu bẩn không gây sập)',
   'OUT_OF_STOCK', getStockStatus(-5), 'OUT_OF_STOCK');
 
-check('TC-U-STK-08', 'Chuỗi "50" được chuyển thành số 50 → sắp hết',
-  'LOW_STOCK', getStockStatus('50'), 'LOW_STOCK');
+check('TC-U-STK-08', 'Chuỗi "15" được chuyển thành số 15 → sắp hết',
+  'LOW_STOCK', getStockStatus('15'), 'LOW_STOCK');
 
 check('TC-U-STK-09', 'Giá trị rác "abc" coi như 0 → hết hàng',
   'OUT_OF_STOCK', getStockStatus('abc'), 'OUT_OF_STOCK');
@@ -454,7 +454,7 @@ const rate = cases.length ? ((passed / cases.length) * 100).toFixed(1) : '0.0';
 // lỗi ngay, không cho phép "đạt 100% giả".
 const EXPECTED_MIN = {
   'Nhóm 1 — Định dạng hiển thị (formatVND, formatDate, calculateDiscountPercent)': 16,
-  'Nhóm 2 — Trạng thái tồn kho (getStockStatus, ngưỡng 100)': 12,
+  'Nhóm 2 — Trạng thái tồn kho (getStockStatus, ngưỡng 20)': 12,
   'Nhóm 3 — Mã khuyến mãi (evaluatePromotion)': 20
 };
 const selfCheckIssues = [];
