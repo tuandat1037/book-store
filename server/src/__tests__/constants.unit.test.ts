@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { getStockStatus, LOW_STOCK_THRESHOLD } from '../config/constants.js';
 
 /**
- * Unit test — server/src/config/constants.ts
- * Chạy: npm run test:unit --prefix server
+ * Kiểm thử đơn vị: getStockStatus (ngưỡng cảnh báo tồn kho = 20, hàm thuần).
+ * Không cần DB/server. Chạy: npm run test:unit --prefix server
  */
 describe('getStockStatus', () => {
   it('TC-U-STK-01: ngưỡng mặc định là 20', () => {

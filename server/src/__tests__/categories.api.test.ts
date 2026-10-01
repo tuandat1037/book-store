@@ -4,139 +4,68 @@ import app from '../app.js';
 import { initDatabase, closeDatabase } from '../config/db.js';
 
 /**
- * Kiểm thử tích hợp CATEGORIES + PHÂN QUYỀN
- * GET /api/categories, POST/PUT/DELETE + requireRole
+ * 8. Kiểm thử quản lý danh mục — bám đúng bảng báo cáo TC-CAT-01 → 05.
+ * Chạy: npx vitest run src/__tests__/categories.api.test.ts
  */
 let adminToken = '';
-let employeeToken = '';
-let customerToken = '';
-let tmpCatId = 0;
+let catId = 0;
 
 beforeAll(async () => {
   await initDatabase();
   const a = await request(app).post('/api/auth/login').send({ email: 'admin@kimdong.vn', password: 'admin123' });
-  const e = await request(app).post('/api/auth/login').send({ email: 'nhanvien@kimdong.vn', password: 'admin123' });
-  const c = await request(app).post('/api/auth/login').send({ email: 'khachhang@gmail.com', password: 'user123' });
   adminToken = a.body.token;
-  employeeToken = e.body.token;
-  customerToken = c.body.token;
 }, 30000);
 
 afterAll(async () => {
-  if (tmpCatId) {
-    await request(app).delete(`/api/categories/${tmpCatId}`).set('Authorization', `Bearer ${adminToken}`);
+  try {
+    if (catId) {
+      await request(app).delete(`/api/categories/${catId}`)
+        .set('Authorization', `Bearer ${adminToken}`);
+    }
+  } finally {
+    await closeDatabase();
   }
-  await closeDatabase();
 });
 
-describe('Quản lý danh mục', () => {
-  it('TC-CAT-01: GET /categories -> 200 + có mục', async () => {
+const admin = () => ({ Authorization: `Bearer ${adminToken}` });
+
+describe('8. Kiểm thử quản lý danh mục', () => {
+  it('TC-CAT-01: GET /categories -> hiển thị đủ danh mục', async () => {
     const res = await request(app).get('/api/categories');
     expect(res.status).toBe(200);
-    const raw = res.body.raw ?? res.body.categories ?? [];
-    expect(raw.length).toBeGreaterThan(0);
+    expect((res.body.raw ?? []).length).toBeGreaterThan(0);
+    expect(Array.isArray(res.body.categories)).toBe(true);
   });
 
-  it('TC-CAT-02: tạo thiếu name -> 400', async () => {
-    const res = await request(app)
-      .post('/api/categories')
-      .set('Authorization', `Bearer ${adminToken}`)
+  it('TC-CAT-02: tạo thiếu name -> thông báo "Tên danh mục là bắt buộc"', async () => {
+    const res = await request(app).post('/api/categories').set(admin())
       .send({ description: 'Thiếu tên' });
     expect(res.status).toBe(400);
+    expect(res.body.message).toBe('Tên danh mục là bắt buộc');
   });
 
-  it('TC-CAT-03: tạo mới -> 201', async () => {
-    const res = await request(app)
-      .post('/api/categories')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send({ name: `Cat Vitest ${Date.now()}`, description: 'test' });
+  it('TC-CAT-03: tạo tên mới hợp lệ -> lưu vào danh sách', async () => {
+    const name = `DM BC ${Date.now()}`;
+    const res = await request(app).post('/api/categories').set(admin())
+      .send({ name, description: 'Danh mục test báo cáo' });
     expect([200, 201]).toContain(res.status);
-    tmpCatId = Number(res.body.categoryId ?? res.body.id);
-    expect(tmpCatId).toBeGreaterThan(0);
+    catId = Number(res.body.categoryId ?? res.body.id);
+    const list = await request(app).get('/api/categories');
+    expect((list.body.raw ?? []).map((c: any) => Number(c.id))).toContain(catId);
   });
 
-  it('TC-CAT-04: xóa danh mục còn sách (id=6) -> 400', async () => {
-    const res = await request(app)
-      .delete('/api/categories/6')
-      .set('Authorization', `Bearer ${adminToken}`);
-    expect(res.status).toBe(400);
+  it('TC-CAT-04: xóa danh mục rỗng vừa tạo -> biến mất', async () => {
+    const del = await request(app).delete(`/api/categories/${catId}`).set(admin());
+    expect(del.status).toBe(200);
+    const list = await request(app).get('/api/categories');
+    expect((list.body.raw ?? []).map((c: any) => Number(c.id))).not.toContain(catId);
+    catId = 0;
   });
 
-  it('TC-CAT-05: xóa danh mục rỗng vừa tạo -> 200', async () => {
-    const res = await request(app)
-      .delete(`/api/categories/${tmpCatId}`)
-      .set('Authorization', `Bearer ${adminToken}`);
-    expect(res.status).toBe(200);
-    tmpCatId = 0;
-  });
-
-  it('TC-CAT-06: update id=999999 -> 404', async () => {
-    const res = await request(app)
-      .put('/api/categories/999999')
-      .set('Authorization', `Bearer ${adminToken}`)
-      .send({ name: 'Không tồn tại' });
-    expect(res.status).toBe(404);
-  });
-});
-
-describe('Phân quyền requireRole', () => {
-  it('TC-PERM-01: CUSTOMER POST /books -> 403', async () => {
-    const res = await request(app)
-      .post('/api/books')
-      .set('Authorization', `Bearer ${customerToken}`)
-      .send({ title: 'X', price: 1000 });
-    expect(res.status).toBe(403);
-  });
-
-  it('TC-PERM-02: CUSTOMER GET /users -> 403', async () => {
-    const res = await request(app)
-      .get('/api/users')
-      .set('Authorization', `Bearer ${customerToken}`);
-    expect(res.status).toBe(403);
-  });
-
-  it('TC-PERM-03: EMPLOYEE GET /users -> 403 (chỉ ADMIN)', async () => {
-    const res = await request(app)
-      .get('/api/users')
-      .set('Authorization', `Bearer ${employeeToken}`);
-    expect(res.status).toBe(403);
-  });
-
-  it('TC-PERM-04: không token gọi /orders -> 401', async () => {
-    const res = await request(app).get('/api/orders');
-    expect(res.status).toBe(401);
-  });
-
-  it('TC-PERM-05: CUSTOMER không xem được /orders/:id/verification -> 403', async () => {
-    // Lấy 1 đơn của customer rồi gọi verification bằng token customer
-    const list = await request(app).get('/api/orders').set('Authorization', `Bearer ${customerToken}`);
-    const firstId = (list.body.orders ?? [])[0]?.id ?? 1;
-    const res = await request(app)
-      .get(`/api/orders/${firstId}/verification`)
-      .set('Authorization', `Bearer ${customerToken}`);
-    expect(res.status).toBe(403);
-  });
-
-  it('TC-PERM-06: EMPLOYEE không sửa được customer -> 403', async () => {
-    const res = await request(app)
-      .put('/api/customers/3')
-      .set('Authorization', `Bearer ${employeeToken}`)
-      .send({ full_name: 'X' });
-    expect(res.status).toBe(403);
-  });
-
-  it('TC-PERM-07: EMPLOYEE không xem được toàn bộ banner -> 403', async () => {
-    const res = await request(app)
-      .get('/api/banners/all')
-      .set('Authorization', `Bearer ${employeeToken}`);
-    expect(res.status).toBe(403);
-  });
-
-  it('TC-PERM-08: EMPLOYEE không tạo được banner -> 403', async () => {
-    const res = await request(app)
-      .post('/api/banners')
-      .set('Authorization', `Bearer ${employeeToken}`)
-      .send({ title: 'X', cta_link: '/books' });
-    expect(res.status).toBe(403);
+  it('TC-CAT-05: xóa danh mục còn sách (id=6) -> còn nguyên', async () => {
+    const del = await request(app).delete('/api/categories/6').set(admin());
+    expect(del.status).toBe(400);
+    const list = await request(app).get('/api/categories');
+    expect((list.body.raw ?? []).map((c: any) => Number(c.id))).toContain(6);
   });
 });

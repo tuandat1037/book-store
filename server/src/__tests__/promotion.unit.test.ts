@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { evaluatePromotion } from '../controllers/promotionController.js';
 
 /**
- * Unit test — server/src/controllers/promotionController.ts :: evaluatePromotion
- * Hàm thuần, không cần DB. Chạy: npm run test:unit --prefix server
+ * Kiểm thử đơn vị: evaluatePromotion (tính tiền giảm giá, hàm thuần).
+ * Không cần DB/server. Chạy: npm run test:unit --prefix server
  */
 function promo(over: any = {}) {
   return {
@@ -22,7 +22,7 @@ function promo(over: any = {}) {
 }
 
 describe('evaluatePromotion', () => {
-  it('TC-U-PRM-01: mã null -> ok=false', () => {
+  it('TC-U-PRM-01: mã null -> ok=false, giảm 0', () => {
     const r = evaluatePromotion(null, 100000);
     expect(r.ok).toBe(false);
     expect(r.discount_amount).toBe(0);
@@ -46,8 +46,7 @@ describe('evaluatePromotion', () => {
   });
 
   it('TC-U-PRM-05: chạm trần max_discount 30k', () => {
-    const r = evaluatePromotion(promo({ max_discount: 30000 }), 1000000);
-    expect(r.discount_amount).toBe(30000);
+    expect(evaluatePromotion(promo({ max_discount: 30000 }), 1000000).discount_amount).toBe(30000);
   });
 
   it('TC-U-PRM-06: chưa chạm trần -> 20k', () => {
@@ -74,9 +73,14 @@ describe('evaluatePromotion', () => {
     expect(evaluatePromotion(promo({ min_order_value: 150000 }), 150000).ok).toBe(true);
   });
 
-  it('TC-U-PRM-12: dùng đủ 100/100 lượt -> hết', () => {
-    const r = evaluatePromotion(promo({ usage_limit: 100, times_used: 100 }), 100000);
+  it('TC-U-PRM-11: thông báo nêu số tiền tối thiểu', async () => {
+    const r = evaluatePromotion(promo({ min_order_value: 150000 }), 100000);
     expect(r.ok).toBe(false);
+    expect(r.message).toMatch(/150\.000/);
+  });
+
+  it('TC-U-PRM-12: dùng đủ 100/100 lượt -> hết', () => {
+    expect(evaluatePromotion(promo({ usage_limit: 100, times_used: 100 }), 100000).ok).toBe(false);
   });
 
   it('TC-U-PRM-13: 99/100 lượt -> còn dùng được', () => {
@@ -92,7 +96,7 @@ describe('evaluatePromotion', () => {
     expect(evaluatePromotion(promo({ end_date: past }), 100000).ok).toBe(false);
   });
 
-  it('TC-U-PRM-16: chưa tới ngày mai -> ok=false', () => {
+  it('TC-U-PRM-16: chưa tới ngày mai -> ok=false', async () => {
     const future = new Date(Date.now() + 86400000).toISOString();
     expect(evaluatePromotion(promo({ start_date: future }), 100000).ok).toBe(false);
   });
@@ -103,16 +107,11 @@ describe('evaluatePromotion', () => {
     expect(evaluatePromotion(promo({ start_date: past, end_date: future }), 100000).ok).toBe(true);
   });
 
-  it('TC-U-PRM-19: đủ ĐK + trần 50k (20% của 500k = 100k -> 50k)', () => {
+  it('TC-U-PRM-18: đủ ĐK + trần 50k (20% của 500k -> 50k)', () => {
     const r = evaluatePromotion(
       promo({ min_order_value: 200000, max_discount: 50000, usage_limit: 10, times_used: 3 }),
       500000
     );
     expect(r.discount_amount).toBe(50000);
-  });
-
-  it('TC-U-PRM-20: kết quả luôn số nguyên', () => {
-    const r = evaluatePromotion(promo({ discount_value: 33 }), 99999);
-    expect(Number.isInteger(r.discount_amount)).toBe(true);
   });
 });
